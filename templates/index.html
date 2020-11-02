@@ -1,0 +1,72 @@
+$def with (current_temperature, current_humidity, sensor_readings)
+$var css: static/css/style.css
+$var scripts: static/scripts/Chart.js static/scripts/sensor-charts.js
+
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+        <title>Vivarium_CTRL</title>
+        <meta name="description" content="Vivarium monitoring and control using a Raspberry Pi.">
+        <meta name="author" content="Daniel Dean <dd@danieldean.uk>">
+        $if self.css:
+            $for style in self.css.split():
+                <link rel="stylesheet" href="$style"/>
+        $if self.scripts:
+            $for script in self.scripts.split():
+                <script src="$script"></script>
+    </head>
+
+    <body>
+        <div class="header">
+            <h1>Vivarium_CTRL</h1>
+        </div>
+        <div class="tile-container">
+            <div class="tile" id="temperature-tile">
+                $current_temperature°C
+            </div>
+            <div class="tile" id="humidity-tile">
+                $current_humidity%
+            </div>
+            <div class="tile" id="camera-tile">
+                <a href="/stream.mjpg">Live</a>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="temperature-chart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="humidity-chart"></canvas>
+        </div>
+        <div class="table-container">
+            <table id="sensor-readings-table">
+                <thead>
+                    <tr>
+                        <th id="readingdatetime">Reading Date & Time</th>
+                        <th id="temperature">Temperature (°C)</th>
+                        <th id="humidity">Humidity (%)</th>
+                        <th id="comments">Comments</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    $for sensor_reading in sensor_readings:
+                        <tr>
+                            <td>$sensor_reading.reading_datetime.split('.')[0]</td>
+                            <td>$sensor_reading.temperature</td>
+                            <td>$sensor_reading.humidity</td>
+                            <td>$sensor_reading.comments</td>
+                        </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="actions-container">
+            <form action="/logout" method="POST">
+                <input type="submit" value="Logout">
+            </form>
+        </div>
+        <div class="footer">
+            <p>Find me on <a href="https://github.com/danieldean/Vivarium_CTRL">GitHub</a></p>
+        </div>
+    </body>
+
+</html>
