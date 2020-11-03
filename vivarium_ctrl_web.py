@@ -75,14 +75,17 @@ class login:
 
     def POST(self):
         username, password = web.input().username, web.input().password
-        user = db.select('users', where='username=$username', vars=locals())[0]
-        password += user.salt
-        password = hashlib.sha256(password.encode('utf-8')).hexdigest()
-        if user.password == password:
-            session.login_state = 1
-            raise web.seeother('/')
-        else:
-            return render.login('Invalid username or password.')
+        users = db.select('users', where='username=$username', vars=locals())
+        # Check if there were any users (only expecting one).
+        if users:
+            user = users[0]
+            password += user.salt
+            password = hashlib.sha256(password.encode('utf-8')).hexdigest()
+            if user.password == password:
+                session.login_state = 1
+                raise web.seeother('/')
+        # If we made it this far either the username does not exist or the password is wrong.
+        return render.login('Invalid username or password.')
 
 
 class logout:
