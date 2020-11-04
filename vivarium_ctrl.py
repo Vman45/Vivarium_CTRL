@@ -30,6 +30,8 @@ def read_sensor(dht_device, num_retries=3):
         except RuntimeError as error:
             if attempt_no < (num_retries - 1):
                 print("Sensor read failed.")
+                # Need to wait at least 2 seconds before retrying otherwise cached data is returned.
+                time.sleep(2)
             else:
                 raise error
 
