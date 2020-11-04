@@ -25,7 +25,7 @@ def read_sensor(dht_device, num_retries=3):
     """
     for attempt_no in range(num_retries):
         try:
-            return dht_device.temperature, dht_device.humidity
+            return dht_device.temperature, dht_device.humidity, attempt_no
         except RuntimeError as error:
             if attempt_no < (num_retries - 1):
                 print("Sensor read failed.")
@@ -64,7 +64,7 @@ def main():
     while True:
 
         # Read using safe function.
-        temperature, humidity = read_sensor(dht_device)
+        temperature, humidity, attempts = read_sensor(dht_device)
 
         # Insert readings (or failure) into the database.
         if humidity is not None and temperature is not None:
@@ -82,7 +82,8 @@ def main():
                 fan.off()
 
             # Write read status and device states to the database.
-            comments = "Read successful. Heat Mat: " + to_string(heat_mat.value) + ", Fan: " + to_string(fan.value)
+            comments = "Read successful (Attempts: " + str(attempts) + "). Heat Mat: " + to_string(heat_mat.value) + \
+                       ", Fan: " + to_string(fan.value)
 
         else:
 
