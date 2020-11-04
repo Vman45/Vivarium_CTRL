@@ -16,9 +16,7 @@ import time
 import sqlite3
 import datetime
 import board
-
-# Set sleep interval (in seconds).
-SLEEP_INTERVAL = 900
+import constants
 
 
 def read_sensor(dht_device, num_retries=3):
@@ -66,7 +64,7 @@ def main():
         # Exit closing database.
         try:
             # Sleep until next read.
-            time.sleep(SLEEP_INTERVAL)
+            time.sleep(constants.SLEEP_INTERVAL)
         except KeyboardInterrupt:
             # Close the database on exit.
             db.close()
