@@ -15,9 +15,9 @@ import adafruit_dht
 import time
 import sqlite3
 import datetime
+import board
 
-# Set device pin and sleep interval (in seconds) constants.
-DHT_PIN = 4
+# Set sleep interval (in seconds).
 SLEEP_INTERVAL = 900
 
 
@@ -39,7 +39,7 @@ def read_sensor(dht_device, num_retries=3):
 def main():
 
     # Initialise sensor, database connection and cursor.
-    dht_device = adafruit_dht.DHT22(DHT_PIN)  # .DHT11(DHT_PIN)
+    dht_device = adafruit_dht.DHT22(board.D4)  # .DHT11(board.D4)
     db = sqlite3.connect('vivarium_ctrl.db')
     c = db.cursor()
 
