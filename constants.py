@@ -11,3 +11,13 @@
 
 # Sleep interval between checking and logging in seconds.
 SLEEP_INTERVAL = 900
+
+# Socket numbers for devices (Energenie module only supports 4).
+HEAT_MAT_SOCKET = 1
+PUMP_SOCKET = 2
+FAN_SOCKET = 3
+LIGHT_SOCKET = 4
+
+# Temperature thresholds (used for heat mat and fan).
+LOW_TEMPERATURE = 15
+HIGH_TEMPERATURE = 25
