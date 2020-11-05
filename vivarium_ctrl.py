@@ -11,28 +11,14 @@
 # http://opensource.org/licenses/MIT
 # 
 
-import adafruit_dht
+import adafruit_bme280
 import time
 import sqlite3
 import datetime
 import board
+import busio
 import constants
 from gpiozero import Energenie
-
-
-def read_sensor(dht_device, num_retries=3):
-    """ Attempt to read from the sensor a set number of times and exit if it fails.
-    """
-    for attempt_no in range(num_retries):
-        try:
-            return dht_device.temperature, dht_device.humidity, attempt_no
-        except RuntimeError as error:
-            if attempt_no < (num_retries - 1):
-                print("Sensor read failed.")
-                # Need to wait at least 2 seconds before retrying otherwise cached data is returned.
-                time.sleep(2)
-            else:
-                raise error
 
 
 def to_string(value):
@@ -47,7 +33,8 @@ def to_string(value):
 def main():
 
     # Initialise sensor, database connection and cursor.
-    dht_device = adafruit_dht.DHT22(board.D4)  # .DHT11(board.D4)
+    i2c = busio.I2C(board.SCL, board.SDA)
+    bme280 = adafruit_bme280.Adafruit_BME280_I2C(i2c)
     db = sqlite3.connect('vivarium_ctrl.db')
     c = db.cursor()
 
@@ -63,32 +50,23 @@ def main():
     # Continue running until interrupted.
     while True:
 
-        # Read using safe function.
-        temperature, humidity, attempts = read_sensor(dht_device)
+        # Get readings.
+        temperature, humidity = bme280.temperature, bme280.relative_humidity
 
-        # Insert readings (or failure) into the database.
-        if humidity is not None and temperature is not None:
+        # Turn the heater on if temperature is low.
+        if temperature <= constants.LOW_TEMPERATURE and not heat_mat.value:
+            heat_mat.on()
+        elif temperature > constants.LOW_TEMPERATURE and heat_mat.value:
+            heat_mat.off()
 
-            # Turn the heater on if temperature is low.
-            if temperature <= constants.LOW_TEMPERATURE and not heat_mat.value:
-                heat_mat.on()
-            elif temperature > constants.LOW_TEMPERATURE and heat_mat.value:
-                heat_mat.off()
+        # Turn the fan on if temperature is high.
+        if temperature >= constants.HIGH_TEMPERATURE and not fan.value:
+            fan.on()
+        elif temperature < constants.HIGH_TEMPERATURE and fan.value:
+            fan.off()
 
-            # Turn the fan on if temperature is high.
-            if temperature >= constants.HIGH_TEMPERATURE and not fan.value:
-                fan.on()
-            elif temperature < constants.HIGH_TEMPERATURE and fan.value:
-                fan.off()
-
-            # Write read status and device states to the database.
-            comments = "Read successful (Attempts: " + str(attempts) + "). Heat Mat: " + to_string(heat_mat.value) + \
-                       ", Fan: " + to_string(fan.value)
-
-        else:
-
-            # Nothing else to do without successful sensor readings. Perhaps fallback code needed for failure.
-            comments = "Read failed. Heat Mat: " + to_string(heat_mat.value) + ", Fan: " + to_string(fan.value)
+        # Write read status and device states to the database.
+        comments = "Heat Mat: " + to_string(heat_mat.value) + ", Fan: " + to_string(fan.value)
 
         # Insert and commit.
         c.execute('INSERT INTO sensor_readings VALUES (?,?,?,?)',
