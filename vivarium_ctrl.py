@@ -51,7 +51,7 @@ def main():
     while True:
 
         # Get readings.
-        temperature, humidity = bme280.temperature, bme280.relative_humidity
+        temperature, humidity = round(bme280.temperature, 2), round(bme280.relative_humidity, 2)
 
         # Turn the heater on if temperature is low.
         if temperature <= constants.LOW_TEMPERATURE and not heat_mat.value:
