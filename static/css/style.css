@@ -59,6 +59,18 @@ body {
 #camera-tile {
     background-image: url('../images/video-solid-white.svg');
 }
+#pump-tile {
+    background-image: url('../images/water-solid-white.svg');
+}
+#light-tile {
+    background-image: url('../images/lightbulb-solid-white.svg');
+}
+#heat-mat-tile {
+    background-image: url('../images/fire-solid-white.svg');
+}
+#fan-tile {
+    background-image: url('../images/fan-solid-white.svg');
+}
 
 /* Full width chart container with centering. Maximum chart sizing. */
 .chart-container {

@@ -60,8 +60,10 @@ class index:
             # Get the current (or last) temperature and humidity.
             current_temperature = sensor_readings[0]['temperature']
             current_humidity = sensor_readings[0]['humidity']
+            # Get device states.
+            device_states = list(db.select('device_states'))
             # Render with table and charts.
-            return render.index(current_temperature, current_humidity, sensor_readings)
+            return render.index(current_temperature, current_humidity, device_states, sensor_readings)
 
 
 class login:

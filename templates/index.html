@@ -1,4 +1,4 @@
-$def with (current_temperature, current_humidity, sensor_readings)
+$def with (current_temperature, current_humidity, device_states, sensor_readings)
 $var css: static/css/style.css
 $var scripts: static/scripts/Chart.js static/scripts/sensor-charts.js
 
@@ -31,6 +31,13 @@ $var scripts: static/scripts/Chart.js static/scripts/sensor-charts.js
             <div class="tile" id="camera-tile">
                 <a href="/stream.mjpg">Live</a>
             </div>
+            $for device_state in device_states:
+                <div class="tile" id="$device_state.device-tile">
+                    $if device_state.state == 1:
+                        On
+                    $else:
+                        Off
+                </div>
         </div>
         <div class="chart-container">
             <canvas id="temperature-chart"></canvas>
