@@ -1,4 +1,4 @@
-$def with (current_temperature, current_humidity, device_states, sensor_readings)
+$def with (device_states, sensor_readings)
 $var css: static/css/style.css
 $var scripts: static/scripts/Chart.js static/scripts/sensor-charts.js
 
@@ -23,10 +23,10 @@ $var scripts: static/scripts/Chart.js static/scripts/sensor-charts.js
         </div>
         <div class="tile-container">
             <div class="tile" id="temperature-tile">
-                $current_temperature°C
+                $sensor_readings[0]['temperature']°C
             </div>
             <div class="tile" id="humidity-tile">
-                $current_humidity%
+                $sensor_readings[0]['humidity']%
             </div>
             <div class="tile" id="camera-tile">
                 <a href="/stream.mjpg">Live</a>
