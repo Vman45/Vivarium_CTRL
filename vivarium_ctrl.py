@@ -19,6 +19,7 @@ import board
 import busio
 import constants
 from gpiozero import Energenie
+import threading
 
 
 def to_string(value):
@@ -28,6 +29,46 @@ def to_string(value):
         return "On"
     else:
         return "Off"
+
+
+def to_bool(value):
+    """ Convert an int (0 or 1) to a boolean.
+    """
+    if value == 1:
+        return True
+    else:
+        return False
+
+
+def device_state_loop():
+
+    # Don't share db connection between threads.
+    db = sqlite3.connect('vivarium_ctrl.db')
+    c = db.cursor()
+
+    # Initialise devices.
+    heat_mat = Energenie(constants.HEAT_MAT_SOCKET)
+    pump = Energenie(constants.PUMP_SOCKET)
+    fan = Energenie(constants.FAN_SOCKET)
+    light = Energenie(constants.LIGHT_SOCKET)
+
+    # Check the device states match every second.
+    while True:
+        device_states = c.execute('SELECT * FROM device_states')
+        for device_state in device_states:
+            if device_state[0] == 'heat-mat':
+                if to_bool(device_state[1]) != heat_mat.value:
+                    heat_mat.value = to_bool(device_state[1])
+            elif device_state[0] == 'pump':
+                if to_bool(device_state[1]) != pump.value:
+                    pump.value = to_bool(device_state[1])
+            elif device_state[0] == 'fan':
+                if to_bool(device_state[1]) != fan.value:
+                    fan.value = to_bool(device_state[1])
+            elif device_state[0] == 'light':
+                if to_bool(device_state[1]) != light.value:
+                    light.value = to_bool(device_state[1])
+        time.sleep(1)
 
 
 def main():
@@ -103,4 +144,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    threading.Thread(target=main).start()
+    threading.Thread(target=device_state_loop).start()
