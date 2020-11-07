@@ -30,7 +30,8 @@ urls = (
     '/login', 'login',
     '/logout', 'logout',
     '/favicon.ico', 'favicon',
-    '/stream.mjpg', 'stream'
+    '/stream.mjpg', 'stream',
+    '/toggle_device', 'toggle_device'
 )
 
 # Setup database connection.
@@ -127,6 +128,22 @@ class favicon:
     """
     def GET(self):
         raise web.seeother('/static/images/favicon.ico')
+
+
+class toggle_device:
+    """ Toggle a devices state.
+    """
+    def POST(self):
+        if session.login_state == 0:
+            raise web.seeother('/login')
+        else:
+            device_state = list(web.input().items())
+            if device_state[0][1] == "On":
+                state = 0
+            else:
+                state = 1
+            db.update('device_states', where='device=$device', vars={'device': device_state[0][0]}, state=state)
+            raise web.seeother('/')
 
 
 if __name__ == "__main__":
