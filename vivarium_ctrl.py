@@ -111,15 +111,8 @@ def sensor_monitor_loop():
                   (datetime.datetime.now(), temperature, humidity, comments))
         db.commit()
 
-        # Exit closing database.
-        try:
-            # Sleep until next read.
-            time.sleep(constants.SLEEP_INTERVAL)
-        except KeyboardInterrupt:
-            # Close the database on exit.
-            db.close()
-            print('Database closed.')
-            return
+        # Sleep until next read.
+        time.sleep(constants.SLEEP_INTERVAL)
 
 
 def main():
