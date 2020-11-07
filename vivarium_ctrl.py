@@ -71,7 +71,7 @@ def device_state_loop():
         time.sleep(1)
 
 
-def main():
+def sensor_monitor_loop():
 
     # Initialise sensor, database connection and cursor.
     i2c = busio.I2C(board.SCL, board.SDA)
@@ -82,21 +82,6 @@ def main():
     # Initialise devices.
     heat_mat = Energenie(constants.HEAT_MAT_SOCKET)
     fan = Energenie(constants.FAN_SOCKET)
-
-    # Create the sensor readings table if it does not already exist.
-    c.execute('CREATE TABLE IF NOT EXISTS sensor_readings (reading_datetime TEXT, temperature NUMERIC, '
-              'humidity NUMERIC, comments TEXT)')
-    db.commit()
-
-    # Create a device states table and initialise all as off.
-    device_states = [('heat-mat', 0),
-                     ('pump', 0),
-                     ('fan', 0),
-                     ('light', 0)]
-    c.execute('DROP TABLE IF EXISTS device_states')
-    c.execute('CREATE TABLE device_states (device TEXT, state NUMERIC)')
-    c.executemany('INSERT INTO device_states VALUES (?,?)', device_states)
-    db.commit()
 
     # Continue running until interrupted.
     while True:
@@ -143,6 +128,34 @@ def main():
             return
 
 
-if __name__ == "__main__":
-    threading.Thread(target=main).start()
+def main():
+
+    # Initialise database connection and cursor.
+    db = sqlite3.connect('vivarium_ctrl.db')
+    c = db.cursor()
+
+    # Create the sensor readings table if it does not already exist.
+    c.execute('CREATE TABLE IF NOT EXISTS sensor_readings (reading_datetime TEXT, temperature NUMERIC, '
+              'humidity NUMERIC, comments TEXT)')
+    db.commit()
+
+    # Create a device states table and initialise all as off.
+    device_states = [('heat-mat', 0),
+                     ('pump', 0),
+                     ('fan', 0),
+                     ('light', 0)]
+    c.execute('DROP TABLE IF EXISTS device_states')
+    c.execute('CREATE TABLE device_states (device TEXT, state NUMERIC)')
+    c.executemany('INSERT INTO device_states VALUES (?,?)', device_states)
+    db.commit()
+
+    # Finished with this connection.
+    db.close()
+
+    # Start threads.
+    threading.Thread(target=sensor_monitor_loop).start()
     threading.Thread(target=device_state_loop).start()
+
+
+if __name__ == "__main__":
+    main()
