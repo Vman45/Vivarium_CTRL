@@ -79,10 +79,6 @@ def sensor_monitor_loop():
     db = sqlite3.connect('vivarium_ctrl.db')
     c = db.cursor()
 
-    # Initialise devices.
-    heat_mat = Energenie(constants.HEAT_MAT_SOCKET)
-    fan = Energenie(constants.FAN_SOCKET)
-
     # Continue running until interrupted.
     while True:
 
@@ -90,27 +86,25 @@ def sensor_monitor_loop():
         temperature, humidity = round(bme280.temperature, 2), round(bme280.relative_humidity, 2)
 
         # Turn the heater on if temperature is low.
-        if temperature <= constants.LOW_TEMPERATURE and not heat_mat.value:
-            heat_mat.on()
+        heat_mat_state = to_bool(c.execute("SELECT state FROM device_states WHERE device='heat-mat'"))
+        if temperature <= constants.LOW_TEMPERATURE and not heat_mat_state:
             c.execute("UPDATE device_states SET state=1 WHERE device='heat-mat'")
             db.commit()
-        elif temperature > constants.LOW_TEMPERATURE and heat_mat.value:
-            heat_mat.off()
+        elif temperature > constants.LOW_TEMPERATURE and heat_mat_state:
             c.execute("UPDATE device_states SET state=0 WHERE device='heat-mat'")
             db.commit()
 
         # Turn the fan on if temperature is high.
-        if temperature >= constants.HIGH_TEMPERATURE and not fan.value:
-            fan.on()
+        fan_state = to_bool(c.execute("SELECT state FROM device_states WHERE device='fan'"))
+        if temperature >= constants.HIGH_TEMPERATURE and not fan_state:
             c.execute("UPDATE device_states SET state=1 WHERE device='fan'")
             db.commit()
-        elif temperature < constants.HIGH_TEMPERATURE and fan.value:
-            fan.off()
+        elif temperature < constants.HIGH_TEMPERATURE and fan_state:
             c.execute("UPDATE device_states SET state=0 WHERE device='fan'")
             db.commit()
 
         # Write read status and device states to the database.
-        comments = "Heat Mat: " + to_string(heat_mat.value) + ", Fan: " + to_string(fan.value)
+        comments = "Heat Mat: " + to_string(heat_mat_state) + ", Fan: " + to_string(fan_state)
 
         # Insert and commit.
         c.execute('INSERT INTO sensor_readings VALUES (?,?,?,?)',
