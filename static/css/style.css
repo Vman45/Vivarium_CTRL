@@ -31,13 +31,16 @@ body {
     font-size: 0;
     text-align: center;
 }
+.tile-container form {
+    display: none;
+}
 .tile {
     height: 100px;
     width: 100px;
     margin-right: 10px;
-    text-align: center;
-    line-height: 100px;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 5px;
     font-size: 1.5rem;
     font-weight: bold;
@@ -49,6 +52,10 @@ body {
 }
 .tile a {
     color: rgb(255, 255, 255);
+}
+.tile input[type=submit] {
+    font: sans-serif;
+    font-size: 1rem;
 }
 #temperature-tile {
     background-image: url('../images/thermometer-half-solid-white.svg');
