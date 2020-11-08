@@ -2,7 +2,7 @@
 
 **Vivarium monitoring and control using a Raspberry Pi.**
 
-![Toad in vivarium.](README.png)
+![Web interface screenshot.](README.png)
 
 Monitor and control a vivarium to ensure its environment remains optimal for the plants and creatures living in it. 
 Currently supports:
