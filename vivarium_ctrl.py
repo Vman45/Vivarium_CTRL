@@ -87,36 +87,39 @@ def sensor_monitor_loop():
 
         # Turn the heater on if temperature is low.
         heat_mat_state = to_bool(c.execute("SELECT state FROM device_states WHERE device='heat-mat'").fetchone()[0])
-        if temperature <= constants.LOW_TEMPERATURE and not heat_mat_state:
-            c.execute("UPDATE device_states SET state=1 WHERE device='heat-mat'")
-            db.commit()
-            heat_mat_state = True
-        elif temperature > constants.LOW_TEMPERATURE and heat_mat_state:
-            c.execute("UPDATE device_states SET state=0 WHERE device='heat-mat'")
-            db.commit()
-            heat_mat_state = False
+        if constants.HEAT_MAT_AUTO:
+            if temperature <= constants.LOW_TEMPERATURE and not heat_mat_state:
+                c.execute("UPDATE device_states SET state=1 WHERE device='heat-mat'")
+                db.commit()
+                heat_mat_state = True
+            elif temperature > constants.LOW_TEMPERATURE and heat_mat_state:
+                c.execute("UPDATE device_states SET state=0 WHERE device='heat-mat'")
+                db.commit()
+                heat_mat_state = False
 
         # Turn the fan on if temperature is high.
         fan_state = to_bool(c.execute("SELECT state FROM device_states WHERE device='fan'").fetchone()[0])
-        if temperature >= constants.HIGH_TEMPERATURE and not fan_state:
-            c.execute("UPDATE device_states SET state=1 WHERE device='fan'")
-            db.commit()
-            fan_state = True
-        elif temperature < constants.HIGH_TEMPERATURE and fan_state:
-            c.execute("UPDATE device_states SET state=0 WHERE device='fan'")
-            db.commit()
-            fan_state = False
+        if constants.FAN_AUTO:
+            if temperature >= constants.HIGH_TEMPERATURE and not fan_state:
+                c.execute("UPDATE device_states SET state=1 WHERE device='fan'")
+                db.commit()
+                fan_state = True
+            elif temperature < constants.HIGH_TEMPERATURE and fan_state:
+                c.execute("UPDATE device_states SET state=0 WHERE device='fan'")
+                db.commit()
+                fan_state = False
 
         # Turn the pump on if the humidity is low.
         pump_state = to_bool(c.execute("SELECT state FROM device_states WHERE device='pump'").fetchone()[0])
-        if humidity <= constants.LOW_HUMIDITY and not pump_state:
-            c.execute("UPDATE device_states SET state=1 WHERE device='pump'")
-            db.commit()
-            pump_state = True
-        elif humidity > constants.LOW_HUMIDITY and pump_state:
-            c.execute("UPDATE device_states SET state=0 WHERE device='pump'")
-            db.commit()
-            pump_state = False
+        if constants.PUMP_AUTO:
+            if humidity <= constants.LOW_HUMIDITY and not pump_state:
+                c.execute("UPDATE device_states SET state=1 WHERE device='pump'")
+                db.commit()
+                pump_state = True
+            elif humidity > constants.LOW_HUMIDITY and pump_state:
+                c.execute("UPDATE device_states SET state=0 WHERE device='pump'")
+                db.commit()
+                pump_state = False
 
         # Light will most likely be on a schedule instead so just fetch the state.
         light_state = to_bool(c.execute("SELECT state FROM device_states WHERE device='light'").fetchone()[0])

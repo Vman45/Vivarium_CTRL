@@ -18,6 +18,12 @@ PUMP_SOCKET = 2
 FAN_SOCKET = 3
 LIGHT_SOCKET = 4
 
+# Control on thresholds or schedule?
+HEAT_MAT_AUTO = True
+PUMP_AUTO = False
+FAN_AUTO = True
+LIGHT_AUTO = False
+
 # Temperature thresholds (used for heat mat and fan).
 LOW_TEMPERATURE = 15
 HIGH_TEMPERATURE = 25
