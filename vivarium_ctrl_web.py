@@ -137,12 +137,12 @@ class toggle_device:
         if session.login_state == 0:
             raise web.seeother('/login')
         else:
-            device_state = list(web.input().items())
-            if device_state[0][1] == "On":
+            device_state = next(iter(web.input().items()))
+            if device_state[1] == "On":
                 state = 0
             else:
                 state = 1
-            db.update('device_states', where='device=$device', vars={'device': device_state[0][0]}, state=state)
+            db.update('device_states', where='device=$device', vars={'device': device_state[0]}, state=state)
             raise web.seeother('/')
 
 
