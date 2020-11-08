@@ -21,3 +21,6 @@ LIGHT_SOCKET = 4
 # Temperature thresholds (used for heat mat and fan).
 LOW_TEMPERATURE = 15
 HIGH_TEMPERATURE = 25
+
+# Humidity thresholds (used for pump, could be mister, etc).
+LOW_HUMIDITY = 60

@@ -107,8 +107,23 @@ def sensor_monitor_loop():
             db.commit()
             fan_state = False
 
+        # Turn the pump on if the humidity is low.
+        pump_state = to_bool(c.execute("SELECT state FROM device_states WHERE device='pump'").fetchone()[0])
+        if humidity <= constants.LOW_HUMIDITY and not pump_state:
+            c.execute("UPDATE device_states SET state=1 WHERE device='pump'")
+            db.commit()
+            pump_state = True
+        elif humidity > constants.LOW_HUMIDITY and pump_state:
+            c.execute("UPDATE device_states SET state=0 WHERE device='pump'")
+            db.commit()
+            pump_state = False
+
+        # Light will most likely be on a schedule instead so just fetch the state.
+        light_state = to_bool(c.execute("SELECT state FROM device_states WHERE device='light'").fetchone()[0])
+
         # Write read status and device states to the database.
-        comments = "Heat Mat: " + to_string(heat_mat_state) + ", Fan: " + to_string(fan_state)
+        comments = "Heat Mat: " + to_string(heat_mat_state) + ", Pump: " + to_string(pump_state) + \
+                   ", Fan: " + to_string(fan_state) + ", Light: " + to_string(light_state)
 
         # Insert and commit.
         c.execute('INSERT INTO sensor_readings VALUES (?,?,?,?)',
