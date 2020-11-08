@@ -40,6 +40,40 @@ def to_bool(value):
         return False
 
 
+def is_time_between(begin_time, end_time, check_time=None):
+    """ Check if a time is within a range.
+        Taken from the accepted answer by Joe Holloway here:
+        https://stackoverflow.com/a/10048290
+    """
+    # If check time is not given, default to current UTC time.
+    check_time = check_time or datetime.datetime.utcnow().time()
+    if begin_time < end_time:
+        return check_time >= begin_time and check_time <= end_time
+    else:  # Crosses midnight.
+        return check_time >= begin_time or check_time <= end_time
+
+
+def scheduler_loop():
+
+    # Don't share db connection between threads.
+    db = sqlite3.connect('vivarium_ctrl.db')
+    c = db.cursor()
+
+    # Update device based on schedule.
+    while True:
+        # Turn the heater on if temperature is low.
+        light_state = to_bool(c.execute("SELECT state FROM device_states WHERE device='light'").fetchone()[0])
+        if constants.LIGHT_AUTO:
+            light_due_on = is_time_between(constants.LIGHT_TIME_ON, constants.LIGHT_TIME_OFF)
+            if light_due_on and not light_state:
+                c.execute("UPDATE device_states SET state=1 WHERE device='light'")
+                db.commit()
+            elif not light_due_on and light_state:
+                c.execute("UPDATE device_states SET state=0 WHERE device='light'")
+                db.commit()
+        time.sleep(1)
+
+
 def device_state_loop():
 
     # Don't share db connection between threads.
@@ -164,6 +198,7 @@ def main():
     # Start threads.
     threading.Thread(target=sensor_monitor_loop).start()
     threading.Thread(target=device_state_loop).start()
+    threading.Thread(target=scheduler_loop).start()
 
 
 if __name__ == "__main__":
