@@ -11,10 +11,10 @@ Currently supports:
 - A live camera stream using any compatible camera.
 - Presentation via a webpage with HTTPS and secure login.
 - Control up to four devices such as heaters, pumps, fans, etc.
+- Automated device control based on time, humidity and temperature.
 
 Future features to include:
 
-- Expanded control of devices and scheduling.
 - Manage users via webpage rather than a script.
 - Loading as a daemon and logging.
 
@@ -60,3 +60,7 @@ the MIT license. It is included rather than fetched as I am likely to run this p
 
 Javascript forked from [HTML Table To JSON](https://j.hn/html-table-to-json/) is used to extract data from the sensor 
 readings table to enable client side chart creation.
+
+A function called ```is_time_between``` included in ```vivirium_ctrl.py``` is from the accepted answer given by Joe 
+Holloway [to this question on Stack Overflow](https://stackoverflow.com/a/10048290), it is licensed under the 
+[CC BY-SA 4.0 license](https://creativecommons.org/licenses/by-sa/4.0/).
