@@ -52,6 +52,6 @@ window.onload = function () {
         return e.humidity;
     });
     //console.log(temperature_values);
-    var temp_chart = BuildChart(labels, temperature_values, "Temperature", "temperature-chart", 'rgba(0,0,255, 0.2)', 'rgba(0,0,255, 0.8)');
-    var humid_chart = BuildChart(labels, humidity_values, "Humidity", "humidity-chart", 'rgba(255,0,0, 0.2)', 'rgba(255,0,0, 0.8)');
+    var temp_chart = BuildChart(labels, temperature_values, "Temperature", "temperature-chart", 'rgba(255, 0, 0, 0.2)', 'rgba(255, 0, 0, 0.8)');
+    var humid_chart = BuildChart(labels, humidity_values, "Humidity", "humidity-chart", 'rgba(0, 0, 255, 0.2)', 'rgba(0, 0, 255, 0.8)');
 }
