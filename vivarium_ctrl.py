@@ -71,7 +71,7 @@ def scheduler_loop():
             elif not light_due_on and light_state:
                 c.execute("UPDATE device_states SET state=0 WHERE device='light'")
                 db.commit()
-        time.sleep(1)
+        time.sleep(constants.SCHEDULER_INTERVAL)
 
 
 def device_state_loop():
@@ -102,7 +102,7 @@ def device_state_loop():
             elif device_state[0] == 'light':
                 if to_bool(device_state[1]) != light.value:
                     light.value = to_bool(device_state[1])
-        time.sleep(1)
+        time.sleep(constants.DEVICE_STATE_INTERVAL)
 
 
 def sensor_monitor_loop():
@@ -168,7 +168,7 @@ def sensor_monitor_loop():
         db.commit()
 
         # Sleep until next read.
-        time.sleep(constants.SLEEP_INTERVAL)
+        time.sleep(constants.SENSOR_MONITOR_INTERVAL)
 
 
 def main():

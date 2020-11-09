@@ -11,8 +11,10 @@
 
 from datetime import time
 
-# Sleep interval between checking and logging in seconds.
-SLEEP_INTERVAL = 900
+# Sleep intervals.
+SENSOR_MONITOR_INTERVAL = 900
+DEVICE_STATE_INTERVAL = 1
+SCHEDULER_INTERVAL = 10
 
 # Socket numbers for devices (Energenie module only supports 4).
 HEAT_MAT_SOCKET = 1
