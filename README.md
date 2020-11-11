@@ -55,8 +55,9 @@ This project contains icons from [Font Awesome](https://fontawesome.com/) licens
 by [Ryan Mandelbaum](https://flic.kr/p/2baRkwQ) licensed under the 
 [CC BY 2.0 license](https://creativecommons.org/licenses/by/2.0/).
 
-[Chart.js](https://www.chartjs.org/) is used to produce the temperature and humidity charts. It is also licensed under 
-the MIT license. It is included rather than fetched as I am likely to run this project locally.
+[Chart.js](https://www.chartjs.org/) and [moment.js](https://momentjs.com/) are used to produce the temperature and 
+humidity charts. They are both also licensed under the [MIT license](LICENSE). The files are included rather than 
+fetched as I am likely to run this project locally.
 
 Javascript forked from [HTML Table To JSON](https://j.hn/html-table-to-json/) is used to extract data from the sensor 
 readings table to enable client side chart creation.
