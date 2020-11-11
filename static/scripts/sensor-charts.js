@@ -1,9 +1,9 @@
-function BuildChart(labels, values, chartTitle, element, backgroundColor, borderColor) {
+function BuildChart(values, chartTitle, element, backgroundColor, borderColor) {
     var ctx = document.getElementById(element).getContext('2d');
     var myChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: labels,
+            labels: [],
             datasets: [{
                 label: chartTitle,
                 data: values,
@@ -13,7 +13,16 @@ function BuildChart(labels, values, chartTitle, element, backgroundColor, border
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true
+            maintainAspectRatio: true,
+            scales: {
+                xAxes: [{
+                    type: 'time',
+                    distribution: 'linear'
+                }],
+                title: {
+                    display: false
+                }
+            }
         }
     });
     return myChart;
@@ -38,20 +47,15 @@ window.onload = function () {
         }
         json.push(rowData);
     }
-    //console.log(json);
-    // Map json values back to label array.
-    var labels = json.map(function (e) {
-        return e.readingdatetime;
-    });
-    //console.log(labels);
     // Map json values back to values array.
-    var temperature_values = json.map(function (e) {
-        return e.temperature;
+    var temperature_data = json.map(function (e) {
+        return {x: e.readingdatetime, y: e.temperature};
     });
-    var humidity_values = json.map(function (e) {
-        return e.humidity;
+    var humidity_data = json.map(function (e) {
+        return {x: e.readingdatetime, y: e.humidity};
     });
-    //console.log(temperature_values);
-    var temp_chart = BuildChart(labels, temperature_values, "Temperature", "temperature-chart", 'rgba(255, 0, 0, 0.2)', 'rgba(255, 0, 0, 0.8)');
-    var humid_chart = BuildChart(labels, humidity_values, "Humidity", "humidity-chart", 'rgba(0, 0, 255, 0.2)', 'rgba(0, 0, 255, 0.8)');
+    //console.log(temperature_data);
+    //console.log(humidity_data);
+    var temperature_chart = BuildChart(temperature_data, "Temperature", "temperature-chart", 'rgba(255, 0, 0, 0.2)', 'rgba(255, 0, 0, 0.8)');
+    var humidity_chart = BuildChart(humidity_data, "Humidity", "humidity-chart", 'rgba(0, 0, 255, 0.2)', 'rgba(0, 0, 255, 0.8)');
 }
