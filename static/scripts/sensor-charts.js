@@ -17,11 +17,20 @@ function BuildChart(values, chartTitle, element, backgroundColor, borderColor) {
             scales: {
                 xAxes: [{
                     type: 'time',
-                    distribution: 'linear'
-                }],
-                title: {
-                    display: false
-                }
+                    distribution: 'linear',
+                    time: {
+                        unit: 'hour',
+                        displayFormats: {
+                            hour: 'H:mm'
+                        }
+                    },
+                    ticks: {
+                        major: {
+                            enabled: true,
+                            fontStyle: 'bold'
+                        }
+                    }
+                }]
             }
         }
     });
