@@ -17,6 +17,8 @@ import picamera
 from cheroot.server import HTTPServer
 from cheroot.ssl.builtin import BuiltinSSLAdapter
 import hashlib
+import datetime
+import time
 
 # Use HTTPS
 HTTPServer.ssl_adapter = BuiltinSSLAdapter(
@@ -56,8 +58,11 @@ class index:
         if session.login_state == 0:
             raise web.seeother('/login')
         else:
-            # Get last 48 readings (roughly 12 hours).
-            sensor_readings = list(db.select('sensor_readings', order='reading_datetime DESC', limit=48))
+            from_datetime = datetime.datetime.fromtimestamp(time.time() - 86400 * 0.5)
+            # Get requested number of readings (roughly 12 hours).
+            sensor_readings = list(db.select('sensor_readings', order='reading_datetime DESC',
+                                             where='reading_datetime>=$from_datetime',
+                                             vars={'from_datetime': from_datetime}))
             # Get device states.
             device_states = list(db.select('device_states'))
             # Render with table and charts.
