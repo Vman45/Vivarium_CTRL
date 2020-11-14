@@ -22,8 +22,8 @@ import time
 
 # Use HTTPS
 HTTPServer.ssl_adapter = BuiltinSSLAdapter(
-        certificate='cert/cert.pem',
-        private_key='cert/key.pem'
+    certificate='cert/cert.pem',
+    private_key='cert/key.pem'
 )
 
 # Set URLs
