@@ -128,6 +128,9 @@ th {
     color: rgb(255, 255, 255);
     background-color: rgba(100, 100, 100, 0.8);
 }
+td.form-buttons {
+    text-align: center;
+}
 
 /* Styling for login page. */
 .login-container {
@@ -136,6 +139,17 @@ th {
     margin: 10px auto 0;
 }
 #login-status {
+    text-align: center;
+    color: rgb(255, 0, 0);
+}
+
+/* Styling for settings page. */
+.settings-container {
+    max-width: 500px;
+    margin: auto;
+    margin: 10px auto 0;
+}
+#settings-status {
     text-align: center;
     color: rgb(255, 0, 0);
 }

@@ -34,7 +34,8 @@ urls = (
     '/logout', 'logout',
     '/favicon.ico', 'favicon',
     '/stream.mjpg', 'stream',
-    '/toggle_device', 'toggle_device'
+    '/toggle_device', 'toggle_device',
+    '/settings', 'settings'
 )
 
 # Setup database connection.
@@ -160,6 +161,24 @@ class toggle_device:
                 state = 1
             db.update('device_states', where='device=$device', vars={'device': device_state[0]}, state=state)
             raise web.seeother('/')
+
+
+class settings:
+    """ Set thresholds and schedules for devices.
+    """
+    def GET(self):
+        if session.login_state == 0:
+            raise web.seeother('/login')
+        else:
+            return render.settings('')
+
+    def POST(self):
+        if session.login_state == 0:
+            raise web.seeother('/login')
+        else:
+            # Just for testing.
+            print(web.input())
+            return render.settings('Settings updated successfully.')
 
 
 if __name__ == "__main__":

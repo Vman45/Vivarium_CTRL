@@ -1,0 +1,102 @@
+$def with (settings_status)
+$var css: static/css/style.css
+
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+        <title>Vivarium_CTRL</title>
+        <meta name="description" content="Vivarium monitoring and control using a Raspberry Pi.">
+        <meta name="author" content="Daniel Dean <dd@danieldean.uk>">
+        $if self.css:
+            $for style in self.css.split():
+                <link rel="stylesheet" href="$style"/>
+    </head>
+
+    <body>
+        <div class="header">
+            <h1>Vivarium_CTRL</h1>
+        </div>
+        <div class="settings-container">
+            <form action="/settings" method="POST">
+                <table id="settings">
+                    <tr>
+                        <th colspan="3">Settings</th>
+                    </tr>
+                    <tr>
+                        <td colspan="3"></td>
+                    </tr>
+                    <tr>
+                        <th colspan="3">Control automatically?</th>
+                    </tr>
+                    <tr>
+                        <td>Heat Mat: </td>
+                        <td><input type="checkbox" name="heat-mat"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Pump: </td>
+                        <td><input type="checkbox" name="pump"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Fan: </td>
+                        <td><input type="checkbox" name="fan"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Light: </td>
+                        <td><input type="checkbox" name="light"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3"></td>
+                    </tr>
+                    <tr>
+                        <th colspan="3">Temperature and humidity thresholds:</th>
+                    </tr>
+                    <tr>
+                        <td>Low Temperature: </td>
+                        <td><input type="number" name="low-temperature" min="-50" max="50"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>High Temperature: </td>
+                        <td><input type="number" name="high-temperature" min="-50" max="50"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Low Humidity: </td>
+                        <td><input type="number" name="low-humidity" min="0" max="100"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3"></td>
+                    </tr>
+                    <tr>
+                        <th colspan="3">Time schedules:</th>
+                    </tr>
+                    <tr>
+                        <td>Light: </td>
+                        <td><label for="light-on">On at: </label><input type="time" id="light-on" name="light-on"></td>
+                        <td><label for="light-off">Off at: </label><input type="time" id="light-off" name="light-off"></td>
+                    </tr>
+                    <tr>
+                        <td class="form-buttons" colspan="3">
+                            <input type="submit" value="Update">
+                            <input type="reset">
+                            <input type="button" value="Back" onclick="location.href='/';">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td id="settings-status" colspan="3">$settings_status</td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+        <div class="footer">
+            <p>Find me on <a href="https://github.com/danieldean/Vivarium_CTRL">GitHub</a></p>
+        </div>
+    </body>
+
+</html>
