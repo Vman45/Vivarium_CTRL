@@ -29,6 +29,7 @@ HTTPServer.ssl_adapter = BuiltinSSLAdapter(
 # Set URLs
 urls = (
     '/', 'index',
+    '/(\d+)', 'index',
     '/login', 'login',
     '/logout', 'logout',
     '/favicon.ico', 'favicon',
@@ -54,12 +55,13 @@ session = web.session.Session(app, web.session.DiskStore('sessions'), initialize
 class index:
     """ Displays all the data and provide links to other features.
     """
-    def GET(self):
+    def GET(self, num_hours=12):
         if session.login_state == 0:
             raise web.seeother('/login')
         else:
-            from_datetime = datetime.datetime.fromtimestamp(time.time() - 86400 * 0.5)
-            # Get requested number of readings (roughly 12 hours).
+            # Calculate date and time by subtracting from timestamp.
+            from_datetime = datetime.datetime.fromtimestamp(time.time() - 3600 * int(num_hours))
+            # Get requested number of readings.
             sensor_readings = list(db.select('sensor_readings', order='reading_datetime DESC',
                                              where='reading_datetime>=$from_datetime',
                                              vars={'from_datetime': from_datetime}))
