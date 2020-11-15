@@ -1,4 +1,4 @@
-$def with (device_states, sensor_readings)
+$def with (device_states, sensor_readings, num_hours)
 $var css: static/css/style.css
 $var scripts: static/scripts/moment.js static/scripts/Chart.js static/scripts/sensor-charts.js
 
@@ -45,6 +45,12 @@ $var scripts: static/scripts/moment.js static/scripts/Chart.js static/scripts/se
         </div>
         <div class="chart-container">
             <canvas id="humidity-chart"></canvas>
+        </div>
+        <div class="hours-select-container">
+            <form action="/" id="hours-select" method="POST"></form>
+            <label for="num_hours">Past hours to load:</label>
+            <input form="hours-select" type="number" id="num_hours" name="num_hours" min="1" max="168" value="$num_hours">
+            <input form="hours-select" type="submit" value="Submit">
         </div>
         <div class="table-container">
             <table id="sensor-readings-table">

@@ -91,6 +91,17 @@ body {
     max-width: 1000px;
 }
 
+/* Hours select container. */
+.hours-select-container {
+    max-width: 968px;
+    margin: 10px auto 0;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.9);
+}
+.hours-select-container form {
+    display: none;
+}
+
 /* Scrollable table with sticky headers. */
 .table-container {
     overflow-y: auto;

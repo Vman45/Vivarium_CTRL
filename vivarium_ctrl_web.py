@@ -68,7 +68,16 @@ class index:
             # Get device states.
             device_states = list(db.select('device_states'))
             # Render with table and charts.
-            return render.index(device_states, sensor_readings)
+            return render.index(device_states, sensor_readings, num_hours)
+
+    def POST(self):
+        if session.login_state == 0:
+            raise web.seeother('/login')
+        else:
+            num_hours = web.input().num_hours
+            if num_hours == '12':
+                num_hours = ''
+            web.seeother('/' + num_hours)
 
 
 class login:
