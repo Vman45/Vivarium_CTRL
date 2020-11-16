@@ -62,7 +62,7 @@ def scheduler_loop():
 
     # Update device based on schedule.
     while True:
-        # Turn the heater on if temperature is low.
+        # Turn the light on if within the on and off time.
         light_state = to_bool(c.execute("SELECT state FROM device_states WHERE device='light'").fetchone()[0])
         if settings['light-auto']:
             light_due_on = is_time_between(settings['light-on-time'], settings['light-off-time'])
