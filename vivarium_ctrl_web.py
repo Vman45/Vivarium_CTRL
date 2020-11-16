@@ -19,6 +19,7 @@ from cheroot.ssl.builtin import BuiltinSSLAdapter
 import hashlib
 import datetime
 import time
+import json
 
 # Use HTTPS
 HTTPServer.ssl_adapter = BuiltinSSLAdapter(
@@ -35,7 +36,7 @@ urls = (
     '/favicon.ico', 'favicon',
     '/stream.mjpg', 'stream',
     '/toggle_device', 'toggle_device',
-    '/settings', 'settings'
+    '/settings', 'Settings'
 )
 
 # Setup database connection.
@@ -163,22 +164,37 @@ class toggle_device:
             raise web.seeother('/')
 
 
-class settings:
+class Settings:
     """ Set thresholds and schedules for devices.
     """
     def GET(self):
         if session.login_state == 0:
             raise web.seeother('/login')
         else:
-            return render.settings('')
+            f = open('settings.json', 'rt')
+            settings = json.loads(f.read())
+            return render.settings(settings, '')
 
     def POST(self):
         if session.login_state == 0:
             raise web.seeother('/login')
         else:
-            # Just for testing.
-            print(web.input())
-            return render.settings('Settings updated successfully.')
+            # Retrieve the input.
+            settings = web.input()
+            # Correct the types (as they will all be string).
+            for key in settings.keys():
+                if settings[key] == 'true':
+                    settings[key] = True
+                elif settings[key] == 'false':
+                    settings[key] = False
+                elif str.isdigit(settings[key]):
+                    settings[key] = int(settings[key])
+            # Write to file immediately.
+            f = open('settings.json', 'wt')
+            f.write(json.dumps(settings, indent=4))
+            f.flush()
+            # Render template with message and new settings.
+            return render.settings(settings, 'Settings updated successfully.')
 
 
 if __name__ == "__main__":

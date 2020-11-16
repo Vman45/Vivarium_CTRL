@@ -1,4 +1,4 @@
-$def with (settings_status)
+$def with (settings, settings_status)
 $var css: static/css/style.css
 
 <html lang="en">
@@ -31,22 +31,46 @@ $var css: static/css/style.css
                     </tr>
                     <tr>
                         <td>Heat Mat: </td>
-                        <td><input type="checkbox" name="heat-mat"></td>
+                        <td>
+                            <input type="hidden" name="heat-mat-auto" value="false">
+                            $if settings['heat-mat-auto']:
+                                <input type="checkbox" name="heat-mat-auto" value="true" checked>
+                            $else:
+                                <input type="checkbox" name="heat-mat-auto" value="true">
+                        </td>
                         <td></td>
                     </tr>
                     <tr>
                         <td>Pump: </td>
-                        <td><input type="checkbox" name="pump"></td>
+                        <td>
+                            <input type="hidden" name="pump-auto" value="false">
+                            $if settings['pump-auto']:
+                                <input type="checkbox" name="pump-auto" value="true" checked>
+                            $else:
+                                <input type="checkbox" name="pump-auto" value="true">
+                        </td>
                         <td></td>
                     </tr>
                     <tr>
                         <td>Fan: </td>
-                        <td><input type="checkbox" name="fan"></td>
+                        <td>
+                            <input type="hidden" name="fan-auto" value="false">
+                            $if settings['fan-auto']:
+                                <input type="checkbox" name="fan-auto" value="true" checked>
+                            $else:
+                                <input type="checkbox" name="fan-auto" value="true">
+                        </td>
                         <td></td>
                     </tr>
                     <tr>
                         <td>Light: </td>
-                        <td><input type="checkbox" name="light"></td>
+                        <td>
+                            <input type="hidden" name="light-auto" value="false">
+                            $if settings['light-auto']:
+                                <input type="checkbox" name="light-auto" value="true" checked>
+                            $else:
+                                <input type="checkbox" name="light-auto" value="true">
+                        </td>
                         <td></td>
                     </tr>
                     <tr>
@@ -57,17 +81,17 @@ $var css: static/css/style.css
                     </tr>
                     <tr>
                         <td>Low Temperature: </td>
-                        <td><input type="number" name="low-temperature" min="-50" max="50"></td>
+                        <td><input type="number" name="low-temperature" min="-50" max="50" value="$settings['low-temperature']"></td>
                         <td></td>
                     </tr>
                     <tr>
                         <td>High Temperature: </td>
-                        <td><input type="number" name="high-temperature" min="-50" max="50"></td>
+                        <td><input type="number" name="high-temperature" min="-50" max="50" value="$settings['high-temperature']"></td>
                         <td></td>
                     </tr>
                     <tr>
                         <td>Low Humidity: </td>
-                        <td><input type="number" name="low-humidity" min="0" max="100"></td>
+                        <td><input type="number" name="low-humidity" min="0" max="100" value="$settings['low-humidity']"></td>
                         <td></td>
                     </tr>
                     <tr>
@@ -78,8 +102,8 @@ $var css: static/css/style.css
                     </tr>
                     <tr>
                         <td>Light: </td>
-                        <td><label for="light-on">On at: </label><input type="time" id="light-on" name="light-on"></td>
-                        <td><label for="light-off">Off at: </label><input type="time" id="light-off" name="light-off"></td>
+                        <td><label for="light-on-time">On at: </label><input type="time" id="light-on-time" name="light-on-time" value="$settings['light-on-time']"></td>
+                        <td><label for="light-off-time">Off at: </label><input type="time" id="light-off-time" name="light-off-time" value="$settings['light-off-time']"></td>
                     </tr>
                     <tr>
                         <td class="form-buttons" colspan="3">
