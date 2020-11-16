@@ -193,6 +193,8 @@ class Settings:
             f = open('settings.json', 'wt')
             f.write(json.dumps(settings, indent=4))
             f.flush()
+            # Set reload flag.
+            db.update('flags', where="flag='reload_settings'", state=1)
             # Render template with message and new settings.
             return render.settings(settings, 'Settings updated successfully.')
 

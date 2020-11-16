@@ -20,6 +20,7 @@ import busio
 import constants
 from gpiozero import Energenie
 import threading
+import json
 
 
 def to_string(value):
@@ -63,8 +64,8 @@ def scheduler_loop():
     while True:
         # Turn the heater on if temperature is low.
         light_state = to_bool(c.execute("SELECT state FROM device_states WHERE device='light'").fetchone()[0])
-        if constants.LIGHT_AUTO:
-            light_due_on = is_time_between(constants.LIGHT_TIME_ON, constants.LIGHT_TIME_OFF)
+        if settings['light-auto']:
+            light_due_on = is_time_between(settings['light-on-time'], settings['light-off-time'])
             if light_due_on and not light_state:
                 c.execute("UPDATE device_states SET state=1 WHERE device='light'")
                 db.commit()
@@ -74,7 +75,7 @@ def scheduler_loop():
         time.sleep(constants.SCHEDULER_INTERVAL)
 
 
-def device_state_loop():
+def device_and_settings_loop():
 
     # Don't share db connection between threads.
     db = sqlite3.connect('vivarium_ctrl.db')
@@ -86,8 +87,10 @@ def device_state_loop():
     fan = Energenie(constants.FAN_SOCKET)
     light = Energenie(constants.LIGHT_SOCKET)
 
-    # Check the device states match every second.
+    # Continue running until interrupted.
     while True:
+
+        #  Update device states.
         device_states = c.execute('SELECT * FROM device_states')
         for device_state in device_states:
             if device_state[0] == 'heat-mat':
@@ -102,7 +105,16 @@ def device_state_loop():
             elif device_state[0] == 'light':
                 if to_bool(device_state[1]) != light.value:
                     light.value = to_bool(device_state[1])
-        time.sleep(constants.DEVICE_STATE_INTERVAL)
+
+        # Check if settings need reloading.
+        reload_settings = to_bool(c.execute("SELECT state FROM flags WHERE flag='reload_settings'").fetchone()[0])
+        if reload_settings:
+            load_settings()
+            c.execute("UPDATE flags SET state = 0 WHERE flag = 'reload_settings'")
+            db.commit()
+
+        # Pause briefly.
+        time.sleep(constants.DEVICE_AND_SETTINGS_INTERVAL)
 
 
 def sensor_monitor_loop():
@@ -121,36 +133,36 @@ def sensor_monitor_loop():
 
         # Turn the heater on if temperature is low.
         heat_mat_state = to_bool(c.execute("SELECT state FROM device_states WHERE device='heat-mat'").fetchone()[0])
-        if constants.HEAT_MAT_AUTO:
-            if temperature <= constants.LOW_TEMPERATURE and not heat_mat_state:
+        if settings['heat-mat-auto']:
+            if temperature <= settings['low-temperature'] and not heat_mat_state:
                 c.execute("UPDATE device_states SET state=1 WHERE device='heat-mat'")
                 db.commit()
                 heat_mat_state = True
-            elif temperature > constants.LOW_TEMPERATURE and heat_mat_state:
+            elif temperature > settings['low-temperature'] and heat_mat_state:
                 c.execute("UPDATE device_states SET state=0 WHERE device='heat-mat'")
                 db.commit()
                 heat_mat_state = False
 
         # Turn the fan on if temperature is high.
         fan_state = to_bool(c.execute("SELECT state FROM device_states WHERE device='fan'").fetchone()[0])
-        if constants.FAN_AUTO:
-            if temperature >= constants.HIGH_TEMPERATURE and not fan_state:
+        if settings['fan-auto']:
+            if temperature >= settings['high-temperature'] and not fan_state:
                 c.execute("UPDATE device_states SET state=1 WHERE device='fan'")
                 db.commit()
                 fan_state = True
-            elif temperature < constants.HIGH_TEMPERATURE and fan_state:
+            elif temperature < settings['high-temperature'] and fan_state:
                 c.execute("UPDATE device_states SET state=0 WHERE device='fan'")
                 db.commit()
                 fan_state = False
 
         # Turn the pump on if the humidity is low.
         pump_state = to_bool(c.execute("SELECT state FROM device_states WHERE device='pump'").fetchone()[0])
-        if constants.PUMP_AUTO:
-            if humidity <= constants.LOW_HUMIDITY and not pump_state:
+        if settings['pump-auto']:
+            if humidity <= settings['low-humidity'] and not pump_state:
                 c.execute("UPDATE device_states SET state=1 WHERE device='pump'")
                 db.commit()
                 pump_state = True
-            elif humidity > constants.LOW_HUMIDITY and pump_state:
+            elif humidity > settings['low-humidity'] and pump_state:
                 c.execute("UPDATE device_states SET state=0 WHERE device='pump'")
                 db.commit()
                 pump_state = False
@@ -171,7 +183,22 @@ def sensor_monitor_loop():
         time.sleep(constants.SENSOR_MONITOR_INTERVAL)
 
 
+def load_settings():
+    # Load settings.
+    f = open('settings.json', 'rt')
+    settings.update(json.loads(f.read()))
+    # Times will still be string.
+    for key in settings.keys():
+        if type(settings[key]) == str and ':' in settings[key]:
+            settings[key] = datetime.time(int(settings[key].split(':')[0]), int(settings[key].split(':')[1]))
+
+
 def main():
+
+    # Load initial settings.
+    global settings
+    settings = dict()
+    load_settings()
 
     # Initialise database connection and cursor.
     db = sqlite3.connect('vivarium_ctrl.db')
@@ -192,12 +219,18 @@ def main():
     c.executemany('INSERT INTO device_states VALUES (?,?)', device_states)
     db.commit()
 
+    # Create flags table.
+    c.execute('DROP TABLE IF EXISTS flags')
+    c.execute('CREATE TABLE flags (flag TEXT, state NUMERIC)')
+    c.execute("INSERT INTO flags VALUES ('reload_settings', 0)")
+    db.commit()
+
     # Finished with this connection.
     db.close()
 
     # Start threads.
     threading.Thread(target=sensor_monitor_loop).start()
-    threading.Thread(target=device_state_loop).start()
+    threading.Thread(target=device_and_settings_loop).start()
     threading.Thread(target=scheduler_loop).start()
 
 
