@@ -29,13 +29,13 @@ HTTPServer.ssl_adapter = BuiltinSSLAdapter(
 
 # Set URLs
 urls = (
-    '/', 'index',
-    '/(\d+)', 'index',
-    '/login', 'login',
-    '/logout', 'logout',
-    '/favicon.ico', 'favicon',
-    '/stream.mjpg', 'stream',
-    '/toggle_device', 'toggle_device',
+    '/', 'Index',
+    '/(\d+)', 'Index',
+    '/login', 'Login',
+    '/logout', 'Logout',
+    '/favicon.ico', 'Favicon',
+    '/stream.mjpg', 'Stream',
+    '/toggle_device', 'ToggleDevice',
     '/settings', 'Settings'
 )
 
@@ -54,7 +54,7 @@ app = web.application(urls, globals())
 session = web.session.Session(app, web.session.DiskStore('sessions'), initializer={'login_state': 0})
 
 
-class index:
+class Index:
     """ Displays all the data and provide links to other features.
     """
     def GET(self, num_hours=12):
@@ -82,7 +82,7 @@ class index:
             web.seeother('/' + num_hours)
 
 
-class login:
+class Login:
     """ Basic authentication to guard against unauthorised access.
     """
     def GET(self):
@@ -106,7 +106,7 @@ class login:
         return render.login('Invalid username or password.')
 
 
-class logout:
+class Logout:
     """ Logout from a session.
     """
     def POST(self):
@@ -115,7 +115,7 @@ class logout:
         return render.login('Successfully logged out.')
 
 
-class stream:
+class Stream:
     """ Provide an access point for the raw stream.
     """
     def GET(self):
@@ -141,14 +141,14 @@ class stream:
                 camera.close()
 
 
-class favicon:
+class Favicon:
     """ Redirect requests for a favicon.
     """
     def GET(self):
         raise web.seeother('/static/images/favicon.ico')
 
 
-class toggle_device:
+class ToggleDevice:
     """ Toggle a devices state.
     """
     def POST(self):
