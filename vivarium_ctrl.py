@@ -63,8 +63,8 @@ def scheduler_loop():
     # Update device based on schedule.
     while True:
         # Turn the light on if within the on and off time.
-        light_state = to_bool(c.execute("SELECT state FROM device_states WHERE device='light'").fetchone()[0])
         if settings['light-auto']:
+            light_state = to_bool(c.execute("SELECT state FROM device_states WHERE device='light'").fetchone()[0])
             light_due_on = is_time_between(settings['light-on-time'], settings['light-off-time'])
             if light_due_on and not light_state:
                 c.execute("UPDATE device_states SET state=1 WHERE device='light'")
