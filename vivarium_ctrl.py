@@ -12,7 +12,6 @@
 # 
 
 import adafruit_bme280
-import time
 import sqlite3
 import datetime
 import board
@@ -21,6 +20,7 @@ import constants
 from gpiozero import Energenie
 import threading
 import json
+import signal
 
 
 def to_string(value):
@@ -60,8 +60,10 @@ def scheduler_loop():
     db = sqlite3.connect('vivarium_ctrl.db')
     c = db.cursor()
 
+    print('Scheduler thread started.')
+
     # Update device based on schedule.
-    while True:
+    while not running.is_set():
         # Turn the light on if within the on and off time.
         if settings['light-auto']:
             light_state = to_bool(c.execute("SELECT state FROM device_states WHERE device='light'").fetchone()[0])
@@ -72,7 +74,11 @@ def scheduler_loop():
             elif not light_due_on and light_state:
                 c.execute("UPDATE device_states SET state=0 WHERE device='light'")
                 db.commit()
-        time.sleep(constants.SCHEDULER_INTERVAL)
+        running.wait(constants.SCHEDULER_INTERVAL)
+
+    # Close db.
+    db.close()
+    print('Scheduler thread stopped.')
 
 
 def device_and_settings_loop():
@@ -87,8 +93,10 @@ def device_and_settings_loop():
     fan = Energenie(constants.FAN_SOCKET)
     light = Energenie(constants.LIGHT_SOCKET)
 
+    print('Device and settings thread started.')
+
     # Continue running until interrupted.
-    while True:
+    while not running.is_set():
 
         #  Update device states.
         device_states = c.execute('SELECT * FROM device_states')
@@ -114,7 +122,15 @@ def device_and_settings_loop():
             db.commit()
 
         # Pause briefly.
-        time.sleep(constants.DEVICE_AND_SETTINGS_INTERVAL)
+        running.wait(constants.DEVICE_AND_SETTINGS_INTERVAL)
+
+    # Close db and switch off all devices.
+    db.close()
+    heat_mat.off()
+    pump.off()
+    fan.off()
+    light.off()
+    print('Device and settings thread stopped. All devices have been turned off.')
 
 
 def sensor_monitor_loop():
@@ -125,8 +141,10 @@ def sensor_monitor_loop():
     db = sqlite3.connect('vivarium_ctrl.db')
     c = db.cursor()
 
+    print('Sensor monitor thread started.')
+
     # Continue running until interrupted.
-    while True:
+    while not running.is_set():
 
         # Get readings.
         temperature, humidity = round(bme280.temperature, 2), round(bme280.relative_humidity, 2)
@@ -180,7 +198,11 @@ def sensor_monitor_loop():
         db.commit()
 
         # Sleep until next read.
-        time.sleep(constants.SENSOR_MONITOR_INTERVAL)
+        running.wait(constants.SENSOR_MONITOR_INTERVAL)
+
+    # Close db.
+    db.close()
+    print('Sensor monitor thread stopped.')
 
 
 def load_settings():
@@ -191,6 +213,15 @@ def load_settings():
     for key in settings.keys():
         if type(settings[key]) == str and ':' in settings[key]:
             settings[key] = datetime.time(int(settings[key].split(':')[0]), int(settings[key].split(':')[1]))
+    print('Settings (re)loaded.')
+    print(str(settings))
+
+
+def signal_handler(signum, frame):
+    # Shutdown gracefully allowing threads to finish.
+    print(signal.Signals(signum).name + ' received. Stopping threads.')
+    global running
+    running.set()
 
 
 def main():
@@ -228,10 +259,28 @@ def main():
     # Finished with this connection.
     db.close()
 
+    print('Database and tables initialised. Starting threads.')
+
+    # Control loops and catch interrupts.
+    global running
+    running = threading.Event()
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+
     # Start threads.
-    threading.Thread(target=sensor_monitor_loop).start()
-    threading.Thread(target=device_and_settings_loop).start()
-    threading.Thread(target=scheduler_loop).start()
+    sensor_monitor_thread = threading.Thread(target=sensor_monitor_loop)
+    sensor_monitor_thread.start()
+    device_and_settings_thread = threading.Thread(target=device_and_settings_loop)
+    device_and_settings_thread.start()
+    scheduler_thread = threading.Thread(target=scheduler_loop)
+    scheduler_thread.start()
+
+    # Wait for all threads to finish.
+    sensor_monitor_thread.join()
+    device_and_settings_thread.join()
+    scheduler_thread.join()
+
+    print('Shutdown completed successfully.')
 
 
 if __name__ == "__main__":
