@@ -21,6 +21,19 @@ from gpiozero import Energenie
 import threading
 import json
 import signal
+import logging
+from logger import Logger
+import sys
+
+logging.basicConfig(
+    filename='vivarium_ctrl.log',
+    format='%(asctime)s - %(message)s',
+    datefmt='%d-%b-%y %H:%M:%S',
+    level=logging.INFO
+)
+
+sys.stdout = Logger(logging.getLogger(), logging.INFO)
+sys.stderr = Logger(logging.getLogger(), logging.ERROR)
 
 
 def to_string(value):
@@ -60,7 +73,7 @@ def scheduler_loop():
     db = sqlite3.connect('vivarium_ctrl.db')
     c = db.cursor()
 
-    print('Scheduler thread started.')
+    logging.info('Scheduler thread started.')
 
     # Update device based on schedule.
     while not running.is_set():
@@ -78,7 +91,7 @@ def scheduler_loop():
 
     # Close db.
     db.close()
-    print('Scheduler thread stopped.')
+    logging.info('Scheduler thread stopped.')
 
 
 def device_and_settings_loop():
@@ -93,7 +106,7 @@ def device_and_settings_loop():
     fan = Energenie(constants.FAN_SOCKET)
     light = Energenie(constants.LIGHT_SOCKET)
 
-    print('Device and settings thread started.')
+    logging.info('Device and settings thread started.')
 
     # Continue running until interrupted.
     while not running.is_set():
@@ -130,7 +143,7 @@ def device_and_settings_loop():
     pump.off()
     fan.off()
     light.off()
-    print('Device and settings thread stopped. All devices have been turned off.')
+    logging.info('Device and settings thread stopped. All devices have been turned off.')
 
 
 def sensor_monitor_loop():
@@ -141,7 +154,7 @@ def sensor_monitor_loop():
     db = sqlite3.connect('vivarium_ctrl.db')
     c = db.cursor()
 
-    print('Sensor monitor thread started.')
+    logging.info('Sensor monitor thread started.')
 
     # Continue running until interrupted.
     while not running.is_set():
@@ -202,7 +215,7 @@ def sensor_monitor_loop():
 
     # Close db.
     db.close()
-    print('Sensor monitor thread stopped.')
+    logging.info('Sensor monitor thread stopped.')
 
 
 def load_settings():
@@ -213,18 +226,20 @@ def load_settings():
     for key in settings.keys():
         if type(settings[key]) == str and ':' in settings[key]:
             settings[key] = datetime.time(int(settings[key].split(':')[0]), int(settings[key].split(':')[1]))
-    print('Settings (re)loaded.')
-    print(str(settings))
+    logging.info('Settings (re)loaded.')
+    logging.debug(str(settings))
 
 
 def signal_handler(signum, frame):
     # Shutdown gracefully allowing threads to finish.
-    print(signal.Signals(signum).name + ' received. Stopping threads.')
+    logging.info(signal.Signals(signum).name + ' received. Stopping threads.')
     global running
     running.set()
 
 
 def main():
+
+    logging.info('Vivarium_CTRL starting...')
 
     # Load initial settings.
     global settings
@@ -259,7 +274,7 @@ def main():
     # Finished with this connection.
     db.close()
 
-    print('Database and tables initialised. Starting threads.')
+    logging.info('Database and tables initialised. Starting threads.')
 
     # Control loops and catch interrupts.
     global running
@@ -280,7 +295,7 @@ def main():
     device_and_settings_thread.join()
     scheduler_thread.join()
 
-    print('Shutdown completed successfully.')
+    logging.info('Shutdown completed successfully.')
 
 
 if __name__ == "__main__":
