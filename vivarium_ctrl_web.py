@@ -20,6 +20,19 @@ import hashlib
 import datetime
 import time
 import json
+import logging
+from logger import Logger
+import sys
+
+logging.basicConfig(
+    filename='vivarium_ctrl_web.log',
+    format='%(asctime)s - %(message)s',
+    datefmt='%d-%b-%y %H:%M:%S',
+    level=logging.INFO
+)
+
+sys.stdout = Logger(logging.getLogger(), logging.INFO, '- \[\d+/\w+/\d+ \d+:\d+:\d+] ')
+sys.stderr = Logger(logging.getLogger(), logging.ERROR, '- \[\d+/\w+/\d+ \d+:\d+:\d+] ')
 
 # Use HTTPS
 HTTPServer.ssl_adapter = BuiltinSSLAdapter(
