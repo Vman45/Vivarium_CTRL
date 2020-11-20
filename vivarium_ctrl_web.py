@@ -64,7 +64,8 @@ render = web.template.render('templates/')
 # Debug must be disabled for sessions to work.
 web.config.debug = False
 app = web.application(urls, globals())
-session = web.session.Session(app, web.session.DiskStore('sessions'), initializer={'authenticated': False})
+session = web.session.Session(app, web.session.DiskStore('sessions'),
+                              initializer={'authenticated': False, 'username': None})
 
 
 class Index:
@@ -114,8 +115,11 @@ class Login:
             password = hashlib.sha256(password.encode('utf-8')).hexdigest()
             if user.password == password:
                 session.authenticated = True
+                session.username = user.username
+                logging.info("Successful login by user '" + session.username + "'.")
                 raise web.seeother('/')
         # If we made it this far either the username does not exist or the password is wrong.
+        logging.warning("Failed login attempt using username '" + username + "'.")
         return render.login('Invalid username or password.')
 
 
@@ -123,7 +127,9 @@ class Logout:
     """ Logout from a session.
     """
     def POST(self):
+        logging.info("Logout by user '" + session.username + "'.")
         session.authenticated = False
+        session.username = None
         session.kill()
         return render.login('Successfully logged out.')
 
@@ -138,6 +144,7 @@ class Stream:
             camera = picamera.PiCamera()
             camera.resolution = (1280, 960)
             camera.vflip = True
+            logging.info("Camera stream opened by user '" + session.username + "'.")
             web.header('Content-type', 'multipart/x-mixed-replace; boundary=jpgboundary')
             stream = io.BytesIO()
             try:
@@ -150,6 +157,7 @@ class Stream:
             except (KeyboardInterrupt, BrokenPipeError, ConnectionResetError):
                 pass
             finally:
+                logging.info("Camera stream closed by user '" + session.username + "'.")
                 stream.close()
                 camera.close()
 
@@ -169,6 +177,7 @@ class ToggleDevice:
             raise web.seeother('/login')
         else:
             device_state = next(iter(web.input().items()))
+            logging.info("'" + device_state[0] + "' set '" + device_state[1] + "' by user '" + session.username + "'.")
             if device_state[1] == "On":
                 state = 0
             else:
@@ -209,6 +218,7 @@ class Settings:
             # Set reload flag.
             db.update('flags', where="flag='reload_settings'", state=1)
             # Render template with message and new settings.
+            logging.info("Settings updated by user '" + session.username + "'.")
             return render.settings(settings, 'Settings updated successfully.')
 
 
