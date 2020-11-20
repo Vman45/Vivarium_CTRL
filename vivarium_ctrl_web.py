@@ -64,14 +64,14 @@ render = web.template.render('templates/')
 # Debug must be disabled for sessions to work.
 web.config.debug = False
 app = web.application(urls, globals())
-session = web.session.Session(app, web.session.DiskStore('sessions'), initializer={'login_state': 0})
+session = web.session.Session(app, web.session.DiskStore('sessions'), initializer={'authenticated': False})
 
 
 class Index:
     """ Displays all the data and provide links to other features.
     """
     def GET(self, num_hours=12):
-        if session.login_state == 0:
+        if not session.authenticated:
             raise web.seeother('/login')
         else:
             # Calculate date and time by subtracting from timestamp.
@@ -86,7 +86,7 @@ class Index:
             return render.index(device_states, sensor_readings, num_hours)
 
     def POST(self):
-        if session.login_state == 0:
+        if not session.authenticated:
             raise web.seeother('/login')
         else:
             num_hours = web.input().num_hours
@@ -99,7 +99,7 @@ class Login:
     """ Basic authentication to guard against unauthorised access.
     """
     def GET(self):
-        if session.login_state == 0:
+        if not session.authenticated:
             return render.login('')
         else:
             raise web.seeother('/')
@@ -113,7 +113,7 @@ class Login:
             password += user.salt
             password = hashlib.sha256(password.encode('utf-8')).hexdigest()
             if user.password == password:
-                session.login_state = 1
+                session.authenticated = True
                 raise web.seeother('/')
         # If we made it this far either the username does not exist or the password is wrong.
         return render.login('Invalid username or password.')
@@ -123,7 +123,7 @@ class Logout:
     """ Logout from a session.
     """
     def POST(self):
-        session.login_state = 0
+        session.authenticated = False
         session.kill()
         return render.login('Successfully logged out.')
 
@@ -132,7 +132,7 @@ class Stream:
     """ Provide an access point for the raw stream.
     """
     def GET(self):
-        if session.login_state == 0:
+        if not session.authenticated:
             raise web.seeother('/login')
         else:
             camera = picamera.PiCamera()
@@ -165,7 +165,7 @@ class ToggleDevice:
     """ Toggle a devices state.
     """
     def POST(self):
-        if session.login_state == 0:
+        if not session.authenticated:
             raise web.seeother('/login')
         else:
             device_state = next(iter(web.input().items()))
@@ -181,7 +181,7 @@ class Settings:
     """ Set thresholds and schedules for devices.
     """
     def GET(self):
-        if session.login_state == 0:
+        if not session.authenticated:
             raise web.seeother('/login')
         else:
             f = open('settings.json', 'rt')
@@ -189,7 +189,7 @@ class Settings:
             return render.settings(settings, '')
 
     def POST(self):
-        if session.login_state == 0:
+        if not session.authenticated:
             raise web.seeother('/login')
         else:
             # Retrieve the input.
