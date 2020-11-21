@@ -23,9 +23,14 @@ import json
 import logging
 from logger import Logger
 import sys
+import os
+import mimetypes
+
+# Use paths relative to the script.
+dirname = os.path.dirname(__file__)
 
 logging.basicConfig(
-    filename='vivarium_ctrl_web.log',
+    filename=dirname + '/vivarium_ctrl_web.log',
     format='%(asctime)s - %(message)s',
     datefmt='%d-%b-%y %H:%M:%S',
     level=logging.INFO
@@ -36,8 +41,8 @@ sys.stderr = Logger(logging.getLogger(), logging.ERROR, '- \[\d+/\w+/\d+ \d+:\d+
 
 # Use HTTPS
 HTTPServer.ssl_adapter = BuiltinSSLAdapter(
-    certificate='cert/cert.pem',
-    private_key='cert/key.pem'
+    certificate=dirname + '/cert/cert.pem',
+    private_key=dirname + '/cert/key.pem'
 )
 
 # Set URLs
@@ -49,22 +54,23 @@ urls = (
     '/favicon.ico', 'Favicon',
     '/stream.mjpg', 'Stream',
     '/toggle_device', 'ToggleDevice',
-    '/settings', 'Settings'
+    '/settings', 'Settings',
+    '/files/(.*)/(.*)', 'Files'
 )
 
 # Setup database connection.
 db = web.database(
     dbn='sqlite',
-    db='vivarium_ctrl.db'
+    db=dirname + '/vivarium_ctrl.db'
 )
 
 # Templates
-render = web.template.render('templates/')
+render = web.template.render(dirname + '/templates/')
 
 # Debug must be disabled for sessions to work.
 web.config.debug = False
 app = web.application(urls, globals())
-session = web.session.Session(app, web.session.DiskStore('sessions'),
+session = web.session.Session(app, web.session.DiskStore(dirname + '/sessions'),
                               initializer={'authenticated': False, 'username': None})
 
 
@@ -166,7 +172,7 @@ class Favicon:
     """ Redirect requests for a favicon.
     """
     def GET(self):
-        raise web.seeother('/static/images/favicon.ico')
+        raise web.seeother('/files/images/favicon.ico')
 
 
 class ToggleDevice:
@@ -193,7 +199,7 @@ class Settings:
         if not session.authenticated:
             raise web.seeother('/login')
         else:
-            f = open('settings.json', 'rt')
+            f = open(dirname + '/settings.json', 'rt')
             settings = json.loads(f.read())
             return render.settings(settings, '')
 
@@ -212,7 +218,7 @@ class Settings:
                 elif str.isdigit(settings[key]):
                     settings[key] = int(settings[key])
             # Write to file immediately.
-            f = open('settings.json', 'wt')
+            f = open(dirname + '/settings.json', 'wt')
             f.write(json.dumps(settings, indent=4))
             f.flush()
             # Set reload flag.
@@ -220,6 +226,18 @@ class Settings:
             # Render template with message and new settings.
             logging.info("Settings updated by user '" + session.username + "'.")
             return render.settings(settings, 'Settings updated successfully.')
+
+
+class Files:
+    """ A fairly hackey way to get around the fixed path for static files in webpy.
+    """
+    def GET(self, subpath, filename):
+        try:
+            f = open(dirname + '/files/' + subpath + '/' + filename, 'rb').read()
+            web.header('Content-type', mimetypes.guess_type(filename)[0])
+            return f
+        except FileNotFoundError:
+            return web.notfound()
 
 
 if __name__ == "__main__":
