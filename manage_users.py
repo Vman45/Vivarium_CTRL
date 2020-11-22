@@ -15,6 +15,10 @@ import sys
 import sqlite3
 import hashlib
 import secrets
+import os
+
+# Use paths relative to the script.
+dirname = os.path.dirname(__file__)
 
 ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
@@ -36,7 +40,7 @@ There is limited validation on these commands!
 
 def main(args):
 
-    db = sqlite3.connect('vivarium_ctrl.db')
+    db = sqlite3.connect(dirname + '/vivarium_ctrl.db')
     c = db.cursor()
 
     c.execute('CREATE TABLE IF NOT EXISTS users (username CHARACTER VARYING(20) NOT NULL, '
