@@ -9,7 +9,7 @@ body {
     font-family: sans-serif;
     font-size: 100%;
     margin: 0 0 60px; /* Bottom margin is footer height. */
-    background: url('../images/background.jpg') no-repeat center center fixed;
+    background: url('../images/background.jpg') no-repeat center center scroll;
     background-size: cover;
 }
 
@@ -174,4 +174,37 @@ td.form-buttons {
 }
 .footer a, p {
    color: rgba(255, 255, 255, 0.8);
+}
+
+/* For smaller screens. */
+@media screen and (max-width: 999px) {
+    .header h1 {
+        font-size: 2em;
+    }
+    .tile-container {
+        margin: 0;
+        display: block;
+    }
+    .tile {
+        height: 50px;
+        width: calc(90% - 10px);
+        margin: 10px auto 0;
+        display: flex;
+        background-size: auto 50%;
+    }
+    .chart-container, .table-container, .login-container, .settings-container {
+        width: 90%;
+    }
+    .hours-select-container {
+        width: calc(90% - 32px);
+    }
+    .table-container table {
+        width: 1000px;
+    }
+    input[type=number] {
+        width: 50px;
+    }
+    input[type=time] {
+        width: 80px;
+    }
 }
