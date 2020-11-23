@@ -231,12 +231,17 @@ class Settings:
 class Files:
     """ A fairly hackey way to get around the fixed path for static files in webpy.
     """
-    def GET(self, subpath, filename):
+    def GET(self, path, filename):
         try:
-            f = open(dirname + '/files/' + subpath + '/' + filename, 'rb').read()
-            web.header('Content-type', mimetypes.guess_type(filename)[0])
-            return f
-        except FileNotFoundError:
+            etag = str(os.path.getmtime(dirname + '/files/' + path + '/' + filename))
+            lastmodified = datetime.datetime.fromtimestamp(os.path.getmtime(dirname + '/files/' + path + '/' + filename))
+            if web.modified(lastmodified, etag):
+                f = open(dirname + '/files/' + path + '/' + filename, 'rb')
+                web.header('Content-type', mimetypes.guess_type(filename)[0])
+                return f.read()
+            else:
+                return web.notmodified()
+        except (FileNotFoundError, OSError):
             return web.notfound()
 
 
