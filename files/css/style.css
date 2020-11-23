@@ -27,9 +27,11 @@ body {
 
 /* Tile container and tiles to display current status. */
 .tile-container {
-    margin-top: 10px;
+    margin: 10px auto 0;
+    max-width: 1000px;
     font-size: 0;
-    text-align: center;
+    display: flex;
+    justify-content: center;
 }
 .tile-container form {
     display: none;
@@ -54,7 +56,6 @@ body {
     color: rgb(255, 255, 255);
 }
 .tile input[type=submit] {
-    font: sans-serif;
     font-size: 1rem;
 }
 #temperature-tile {
@@ -135,7 +136,6 @@ td.form-buttons {
 /* Styling for login page. */
 .login-container {
     max-width: 500px;
-    margin: auto;
     margin: 10px auto 0;
 }
 #login-status {
@@ -146,7 +146,6 @@ td.form-buttons {
 /* Styling for settings page. */
 .settings-container {
     max-width: 500px;
-    margin: auto;
     margin: 10px auto 0;
 }
 #settings-status {
