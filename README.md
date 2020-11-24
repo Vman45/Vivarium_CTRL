@@ -2,7 +2,7 @@
 
 **Vivarium monitoring and control using a Raspberry Pi.**
 
-![Web interface screenshot.](README.png)
+<img src="desktop.jpg" height="250px"><img src="mobile.jpg" height=250px>
 
 Monitor and control a vivarium to ensure its environment remains optimal for the plants and creatures living in it. 
 Currently supports:
