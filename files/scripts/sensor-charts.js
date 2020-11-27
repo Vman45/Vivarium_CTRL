@@ -65,6 +65,6 @@ window.onload = function () {
     });
     //console.log(temperature_data);
     //console.log(humidity_data);
-    var temperature_chart = BuildChart(temperature_data, "Temperature", "temperature-chart", 'rgba(255, 0, 0, 0.2)', 'rgba(255, 0, 0, 0.8)');
-    var humidity_chart = BuildChart(humidity_data, "Humidity", "humidity-chart", 'rgba(0, 0, 255, 0.2)', 'rgba(0, 0, 255, 0.8)');
+    var temperature_chart = BuildChart(temperature_data, "Temperature (°C)", "temperature-chart", 'rgba(255, 0, 0, 0.2)', 'rgba(255, 0, 0, 0.8)');
+    var humidity_chart = BuildChart(humidity_data, "Humidity (%)", "humidity-chart", 'rgba(0, 0, 255, 0.2)', 'rgba(0, 0, 255, 0.8)');
 }
