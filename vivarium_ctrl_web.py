@@ -154,12 +154,13 @@ class Stream:
             web.header('Content-type', 'multipart/x-mixed-replace; boundary=jpgboundary')
             stream = io.BytesIO()
             try:
-                for foo in camera.capture_continuous(stream, 'jpeg', burst=True):
+                for foo in camera.capture_continuous(stream, 'jpeg'):
                     yield '\r\n--jpgboundary\r\n'
                     web.header('Content-type', 'image/jpeg')
                     yield b'\r\n' + stream.getvalue() + b'\r\n'
                     stream.seek(0)
                     stream.truncate()
+                    time.sleep(0.5)
             except (KeyboardInterrupt, BrokenPipeError, ConnectionResetError):
                 pass
             finally:
