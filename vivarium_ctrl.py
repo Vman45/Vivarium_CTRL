@@ -215,7 +215,7 @@ def sensor_monitor_loop():
         db.commit()
 
         # Sleep until next read.
-        running.wait(constants.SENSOR_MONITOR_INTERVAL)
+        running.wait(settings['update-frequency'])
 
     # Close db.
     db.close()

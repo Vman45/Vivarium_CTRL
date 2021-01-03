@@ -7,5 +7,6 @@
     "low-humidity": 60,
     "light-off-time": "16:30",
     "pump-auto": false,
-    "fan-auto": false
+    "fan-auto": false,
+    "update-frequency": 120
 }
