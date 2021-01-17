@@ -217,7 +217,7 @@ class Settings:
                 elif settings[key] == 'false':
                     settings[key] = False
                 elif str.isdigit(settings[key]):
-                    settings[key] = int(settings[key])
+                    settings[key] = float(settings[key])
             # Write to file immediately.
             f = open(dirname + '/settings.json', 'wt')
             f.write(json.dumps(settings, indent=4))
