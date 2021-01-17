@@ -216,8 +216,10 @@ class Settings:
                     settings[key] = True
                 elif settings[key] == 'false':
                     settings[key] = False
-                elif str.isdigit(settings[key]):
-                    settings[key] = float(settings[key])
+                else:
+                    value = to_float(settings[key])
+                    if value is not None:
+                        settings[key] = value
             # Write to file immediately.
             f = open(dirname + '/settings.json', 'wt')
             f.write(json.dumps(settings, indent=4))
@@ -244,6 +246,13 @@ class Files:
                 return web.notmodified()
         except (FileNotFoundError, OSError):
             return web.notfound()
+
+
+def to_float(value):
+    try:
+        return float(value)
+    except ValueError:
+        return None
 
 
 if __name__ == "__main__":
