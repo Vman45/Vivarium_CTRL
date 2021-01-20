@@ -287,11 +287,11 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
 
     # Start threads.
-    sensor_monitor_thread = threading.Thread(target=sensor_monitor_loop)
+    sensor_monitor_thread = threading.Thread(target=sensor_monitor_loop, name='Sensor Monitor Thread')
     sensor_monitor_thread.start()
-    device_and_settings_thread = threading.Thread(target=device_and_settings_loop)
+    device_and_settings_thread = threading.Thread(target=device_and_settings_loop, name='Device and Settings Thread')
     device_and_settings_thread.start()
-    scheduler_thread = threading.Thread(target=scheduler_loop)
+    scheduler_thread = threading.Thread(target=scheduler_loop, name='Scheduler Thread')
     scheduler_thread.start()
 
     # Wait for all threads to finish.
