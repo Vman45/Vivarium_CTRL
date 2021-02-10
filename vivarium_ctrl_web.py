@@ -184,11 +184,11 @@ class ToggleDevice:
             raise web.seeother('/login')
         else:
             device_state = next(iter(web.input().items()))
-            logging.info("'" + device_state[0] + "' set '" + device_state[1] + "' by user '" + session.username + "'.")
             if device_state[1] == "On":
                 state = 0
             else:
                 state = 1
+            logging.info("'" + device_state[0] + "' set '" + to_string(state) + "' by user '" + session.username + "'.")
             db.update('device_states', where='device=$device', vars={'device': device_state[0]}, state=state)
             raise web.seeother('/')
 
@@ -253,6 +253,15 @@ def to_float(value):
         return float(value)
     except ValueError:
         return None
+
+
+def to_string(value):
+    """ Convert a boolean to on/off as a string.
+    """
+    if value:
+        return "On"
+    else:
+        return "Off"
 
 
 if __name__ == "__main__":
