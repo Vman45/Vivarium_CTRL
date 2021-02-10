@@ -23,17 +23,19 @@ cd Vivarium_CTRL
 
 Make sure the scripts are still executable using:
 
-```chmod +x vivarium_ctrl.* vivarium_ctrl_web.*```
+```chmod +x vivarium_ctrl.py vivarium_ctrl_web.py```
 
-Copy the init scripts into the required directory:
+Copy the service files into the required directory:
 
-```sudo cp *.sh /etc/init.d```
+```sudo cp *.service /etc/systemd/system/```
 
-And update the symbolic links:
+Start and enable the services:
 
 ```
-sudo update-rc.d vivarium_ctrl.sh defaults
-sudo update-rc.d vivarium_ctrl_web.sh defaults
+sudo systemctl start vivarium_ctrl.service
+sudo systemctl start vivarium_ctrl_web.service
+sudo systemctl enable vivarium_ctrl.service
+sudo systemctl enable vivarium_ctrl_web.service
 ``` 
 
 You also need to add a user before being able to login the the web interface. Assuming you are still in the 
