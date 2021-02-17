@@ -48,6 +48,7 @@ HTTPServer.ssl_adapter = BuiltinSSLAdapter(
 # Set URLs
 urls = (
     '/', 'Index',
+    '/update', 'Update',
     '/(\d+)', 'Index',
     '/login', 'Login',
     '/logout', 'Logout',
@@ -100,6 +101,27 @@ class Index:
             if num_hours == '12':
                 num_hours = ''
             web.seeother('/' + num_hours)
+
+
+class Update:
+    """ Return live sensor readings from the database.
+    """
+    def GET(self):
+        if not session.authenticated:
+            return render.login('')
+        else:
+            # Set the start date to the epoch and last read to starting values.
+            last_modified = datetime.datetime.fromtimestamp(0)
+            last_read = None
+            # Read the last row from the table every time the databases last modified date changes.
+            while True:
+                if datetime.datetime.fromtimestamp(os.path.getmtime(dirname + '/vivarium_ctrl.db')) > last_modified:
+                    last_modified = datetime.datetime.fromtimestamp(os.path.getmtime(dirname + '/vivarium_ctrl.db'))
+                    if db.select('sensor_readings', order='reading_datetime DESC', limit=1)[0] != last_read:
+                        last_read = db.select('sensor_readings', order='reading_datetime DESC', limit=1)[0]
+                        web.header('Content-type', 'application/json')
+                        yield '\r\n' + json.dumps(last_read) + '\r\n'
+                time.sleep(1)
 
 
 class Login:
