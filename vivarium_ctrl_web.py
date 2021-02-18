@@ -115,10 +115,12 @@ class Update:
             last_read = None
             # Read the last row from the table every time the databases last modified date changes.
             while True:
-                if datetime.datetime.fromtimestamp(os.path.getmtime(dirname + '/vivarium_ctrl.db')) > last_modified:
-                    last_modified = datetime.datetime.fromtimestamp(os.path.getmtime(dirname + '/vivarium_ctrl.db'))
-                    if db.select('sensor_readings', order='reading_datetime DESC', limit=1)[0] != last_read:
-                        last_read = db.select('sensor_readings', order='reading_datetime DESC', limit=1)[0]
+                this_modified = datetime.datetime.fromtimestamp(os.path.getmtime(dirname + '/vivarium_ctrl.db'))
+                if this_modified > last_modified:
+                    last_modified = this_modified
+                    this_read = db.select('sensor_readings', order='reading_datetime DESC', limit=1)[0]
+                    if this_read != last_read:
+                        last_read = this_read
                         web.header('Content-type', 'application/json')
                         yield '\r\n' + json.dumps(last_read) + '\r\n'
                 time.sleep(1)
