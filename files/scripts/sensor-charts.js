@@ -71,6 +71,72 @@ function chartsFromTable() {
     humidity_chart = BuildChart(humidity_data, "Humidity (%)", "humidity-chart", 'rgba(0, 0, 255, 0.2)', 'rgba(0, 0, 255, 0.8)');
 }
 
+function updateCharts(data) {
+    temperature_chart.data.datasets[0].data.push({x: data.reading_datetime.split(".")[0], y: data.temperature});
+    temperature_chart.data.datasets[0].data.shift();
+    temperature_chart.update();
+    humidity_chart.data.datasets[0].data.push({x: data.reading_datetime.split(".")[0], y: data.humidity});
+    humidity_chart.data.datasets[0].data.shift();
+    humidity_chart.update();
+}
+
+function intToOnOff(value) {
+    if(value === 1) {
+        return "On";
+    } else {
+        return "Off";
+    }
+}
+
+function updateTableAndTiles(data) {
+    $("#sensor-readings-table tbody tr:first").before(
+        "<tr>" +
+        "   <td>" + data.reading_datetime.split(".")[0] + "</td>" +
+        "   <td>" + data.temperature + "</td>" +
+        "   <td>" + data.humidity + "</td>" +
+        "   <td>" + data.comments + "</td>" +
+        "</td>"
+    );
+    $("#sensor-readings-table tbody tr:last").remove();
+    $("#temperature-tile").text(data.temperature + "°C");
+    $("#humidity-tile").text(data.humidity + "%");
+    $("#heat-mat-tile input").val(intToOnOff(data["heat-mat"]));
+    $("#pump-tile input").val(intToOnOff(data.pump));
+    $("#fan-tile input").val(intToOnOff(data.fan));
+    $("#light-tile input").val(intToOnOff(data.light));
+}
+
 window.onload = function () {
+    // Build the initial charts based on the page load before doing AJAX.
     chartsFromTable();
+    // Read an AJAX stream (containing JSON) incrementally.
+    // Forked from https://stackoverflow.com/a/18964123 with some additions.
+    // Under the CC BY-SA 3.0 licence.
+    var last_response_length = false;
+    $.ajax("update", {
+        xhrFields: {
+            onprogress: function(e) {
+                var this_response, response = e.currentTarget.response;
+                if(last_response_length === false) {
+                    this_response = response;
+                    last_response_length = response.length;
+                } else {
+                    this_response = response.substring(last_response_length);
+                    last_response_length = response.length;
+                }
+                console.log("This Response: ", this_response);
+                // Parse to JSON, update the table and tiles, then reload the charts.
+                data = JSON.parse(this_response);
+                updateTableAndTiles(data);
+                updateCharts(data);
+            }
+        }
+    })
+    .done(function(data) {
+        console.log("Complete response: ", data);
+    })
+    .fail(function(data) {
+        console.log("Error: ", data);
+    });
+    console.log("Request Sent");
 }
