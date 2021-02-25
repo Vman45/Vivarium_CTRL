@@ -1,3 +1,6 @@
+var temperature_chart = null;
+var humidity_chart = null;
+
 function BuildChart(values, chartTitle, element, backgroundColor, borderColor) {
     var ctx = document.getElementById(element).getContext('2d');
     var myChart = new Chart(ctx, {
@@ -37,8 +40,7 @@ function BuildChart(values, chartTitle, element, backgroundColor, borderColor) {
     return myChart;
 }
 
-// Need to wait until table is loaded.
-window.onload = function () {
+function chartsFromTable() {
     // HTML To JSON Script
     // Forked from https://j.hn/html-table-to-json/ with some changes.
     var table = document.getElementById("sensor-readings-table");
@@ -65,6 +67,10 @@ window.onload = function () {
     });
     //console.log(temperature_data);
     //console.log(humidity_data);
-    var temperature_chart = BuildChart(temperature_data, "Temperature (°C)", "temperature-chart", 'rgba(255, 0, 0, 0.2)', 'rgba(255, 0, 0, 0.8)');
-    var humidity_chart = BuildChart(humidity_data, "Humidity (%)", "humidity-chart", 'rgba(0, 0, 255, 0.2)', 'rgba(0, 0, 255, 0.8)');
+    temperature_chart = BuildChart(temperature_data, "Temperature (°C)", "temperature-chart", 'rgba(255, 0, 0, 0.2)', 'rgba(255, 0, 0, 0.8)');
+    humidity_chart = BuildChart(humidity_data, "Humidity (%)", "humidity-chart", 'rgba(0, 0, 255, 0.2)', 'rgba(0, 0, 255, 0.8)');
+}
+
+window.onload = function () {
+    chartsFromTable();
 }
