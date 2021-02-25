@@ -112,8 +112,8 @@ class Update:
         if not session.authenticated:
             return render.login('')
         else:
-            # Set the start date to the epoch and last read to starting values.
-            last_modified = datetime.datetime.fromtimestamp(0)
+            # Set the start date and time to now and last read to starting values.
+            last_modified = datetime.datetime.now()
             last_read = None
             # Read the last row from the table every time the databases last modified date changes.
             while True:
@@ -121,6 +121,9 @@ class Update:
                 if this_modified > last_modified:
                     last_modified = this_modified
                     this_read = db.select('sensor_readings', order='reading_datetime DESC', limit=1)[0]
+                    # Add the device states to the response.
+                    for device_state in db.select('device_states'):
+                        this_read.update({device_state['device']: device_state['state']})
                     if this_read != last_read:
                         last_read = this_read
                         web.header('Content-type', 'application/json')
