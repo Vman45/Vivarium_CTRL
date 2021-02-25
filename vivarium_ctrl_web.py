@@ -261,8 +261,10 @@ class Files:
     def GET(self, path, filename):
         try:
             etag = str(os.path.getmtime(dirname + '/files/' + path + '/' + filename))
-            lastmodified = datetime.datetime.fromtimestamp(os.path.getmtime(dirname + '/files/' + path + '/' + filename))
-            if web.modified(lastmodified, etag):
+            last_modified = datetime.datetime.fromtimestamp(
+                os.path.getmtime(dirname + '/files/' + path + '/' + filename)
+            )
+            if web.modified(last_modified, etag):
                 f = open(dirname + '/files/' + path + '/' + filename, 'rb')
                 web.header('Content-type', mimetypes.guess_type(filename)[0])
                 return f.read()
