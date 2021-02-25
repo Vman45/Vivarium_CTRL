@@ -28,9 +28,11 @@ import os
 
 # Use paths relative to the script.
 dirname = os.path.dirname(__file__)
+if dirname:
+    dirname += '/'
 
 logging.basicConfig(
-    filename=dirname + '/vivarium_ctrl.log',
+    filename=dirname + 'vivarium_ctrl.log',
     format='%(asctime)s - %(message)s',
     datefmt='%d-%b-%y %H:%M:%S',
     level=logging.INFO
@@ -74,7 +76,7 @@ def is_time_between(begin_time, end_time, check_time=None):
 def scheduler_loop():
 
     # Don't share db connection between threads.
-    db = sqlite3.connect(dirname + '/vivarium_ctrl.db')
+    db = sqlite3.connect(dirname + 'vivarium_ctrl.db')
     c = db.cursor()
 
     logging.info('Scheduler thread started.')
@@ -101,7 +103,7 @@ def scheduler_loop():
 def device_and_settings_loop():
 
     # Don't share db connection between threads.
-    db = sqlite3.connect(dirname + '/vivarium_ctrl.db')
+    db = sqlite3.connect(dirname + 'vivarium_ctrl.db')
     c = db.cursor()
 
     # Initialise devices.
@@ -155,7 +157,7 @@ def sensor_monitor_loop():
     # Initialise sensor, database connection and cursor.
     i2c = busio.I2C(board.SCL, board.SDA)
     bme280 = adafruit_bme280.Adafruit_BME280_I2C(i2c)
-    db = sqlite3.connect(dirname + '/vivarium_ctrl.db')
+    db = sqlite3.connect(dirname + 'vivarium_ctrl.db')
     c = db.cursor()
 
     logging.info('Sensor monitor thread started.')
@@ -224,7 +226,7 @@ def sensor_monitor_loop():
 
 def load_settings():
     # Load settings.
-    f = open(dirname + '/settings.json', 'rt')
+    f = open(dirname + 'settings.json', 'rt')
     settings.update(json.loads(f.read()))
     # Times will still be string.
     for key in settings.keys():
@@ -251,7 +253,7 @@ def main():
     load_settings()
 
     # Initialise database connection and cursor.
-    db = sqlite3.connect(dirname + '/vivarium_ctrl.db')
+    db = sqlite3.connect(dirname + 'vivarium_ctrl.db')
     c = db.cursor()
 
     # Create the sensor readings table if it does not already exist.

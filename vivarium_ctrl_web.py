@@ -28,9 +28,11 @@ import mimetypes
 
 # Use paths relative to the script.
 dirname = os.path.dirname(__file__)
+if dirname:
+    dirname += '/'
 
 logging.basicConfig(
-    filename=dirname + '/vivarium_ctrl_web.log',
+    filename=dirname + 'vivarium_ctrl_web.log',
     format='%(asctime)s - %(message)s',
     datefmt='%d-%b-%y %H:%M:%S',
     level=logging.INFO
@@ -41,8 +43,8 @@ sys.stderr = Logger(logging.getLogger(), logging.ERROR, '- \[\d+/\w+/\d+ \d+:\d+
 
 # Use HTTPS
 HTTPServer.ssl_adapter = BuiltinSSLAdapter(
-    certificate=dirname + '/cert/cert.pem',
-    private_key=dirname + '/cert/key.pem'
+    certificate=dirname + 'cert/cert.pem',
+    private_key=dirname + 'cert/key.pem'
 )
 
 # Set URLs
@@ -62,16 +64,16 @@ urls = (
 # Setup database connection.
 db = web.database(
     dbn='sqlite',
-    db=dirname + '/vivarium_ctrl.db'
+    db=dirname + 'vivarium_ctrl.db'
 )
 
 # Templates
-render = web.template.render(dirname + '/templates/')
+render = web.template.render(dirname + 'templates/')
 
 # Debug must be disabled for sessions to work.
 web.config.debug = False
 app = web.application(urls, globals())
-session = web.session.Session(app, web.session.DiskStore(dirname + '/sessions'),
+session = web.session.Session(app, web.session.DiskStore(dirname + 'sessions'),
                               initializer={'authenticated': False, 'username': None})
 
 
@@ -115,7 +117,7 @@ class Update:
             last_read = None
             # Read the last row from the table every time the databases last modified date changes.
             while True:
-                this_modified = datetime.datetime.fromtimestamp(os.path.getmtime(dirname + '/vivarium_ctrl.db'))
+                this_modified = datetime.datetime.fromtimestamp(os.path.getmtime(dirname + 'vivarium_ctrl.db'))
                 if this_modified > last_modified:
                     last_modified = this_modified
                     this_read = db.select('sensor_readings', order='reading_datetime DESC', limit=1)[0]
@@ -224,7 +226,7 @@ class Settings:
         if not session.authenticated:
             raise web.seeother('/login')
         else:
-            f = open(dirname + '/settings.json', 'rt')
+            f = open(dirname + 'settings.json', 'rt')
             settings = json.loads(f.read())
             return render.settings(settings, '')
 
@@ -245,7 +247,7 @@ class Settings:
                     if value is not None:
                         settings[key] = value
             # Write to file immediately.
-            f = open(dirname + '/settings.json', 'wt')
+            f = open(dirname + 'settings.json', 'wt')
             f.write(json.dumps(settings, indent=4))
             f.flush()
             # Set reload flag.
@@ -260,12 +262,12 @@ class Files:
     """
     def GET(self, path, filename):
         try:
-            etag = str(os.path.getmtime(dirname + '/files/' + path + '/' + filename))
+            etag = str(os.path.getmtime(dirname + 'files/' + path + '/' + filename))
             last_modified = datetime.datetime.fromtimestamp(
-                os.path.getmtime(dirname + '/files/' + path + '/' + filename)
+                os.path.getmtime(dirname + 'files/' + path + '/' + filename)
             )
             if web.modified(last_modified, etag):
-                f = open(dirname + '/files/' + path + '/' + filename, 'rb')
+                f = open(dirname + 'files/' + path + '/' + filename, 'rb')
                 web.header('Content-type', mimetypes.guess_type(filename)[0])
                 return f.read()
             else:
