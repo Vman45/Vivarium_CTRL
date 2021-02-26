@@ -94,16 +94,15 @@ This project contains icons from [Font Awesome](https://fontawesome.com/) licens
 by [Ryan Mandelbaum](https://flic.kr/p/2baRkwQ) licensed under the 
 [CC BY 2.0 license](https://creativecommons.org/licenses/by/2.0/).
 
-[Chart.js](https://www.chartjs.org/) and [moment.js](https://momentjs.com/) are used to produce the temperature and 
-humidity charts. They are both also licensed under the [MIT license](LICENSE). The files are included rather than 
-fetched as I am likely to run this project locally.
+[Chart.js](https://www.chartjs.org/), [moment.js](https://momentjs.com/) and [jQuery](https://jquery.com/) are used in 
+the production of charts and live reloading. They are all licensed under the [MIT license](LICENSE). The files are 
+included rather than fetched as I am likely to run this project locally.
 
 Javascript forked from [HTML Table To JSON](https://j.hn/html-table-to-json/) is used to extract data from the sensor 
-readings table to enable client side chart creation.
+readings table to enable client side chart creation. A further Javascript function to support streaming of JSON is 
+forked from [an answer to this question on Stack Overflow](https://stackoverflow.com/a/18964123) and it is licensed under 
+the [CC BY-SA 3.0 license](https://creativecommons.org/licenses/by-sa/3.0/).
 
 A function called ```is_time_between``` included in ```vivirium_ctrl.py``` is from the accepted answer given by Joe 
 Holloway [to this question on Stack Overflow](https://stackoverflow.com/a/10048290), it is licensed under the 
 [CC BY-SA 4.0 license](https://creativecommons.org/licenses/by-sa/4.0/).
-
-Init scripts and guidance on using them borrowed from 
-[Stephen C Phillips' blog](http://blog.scphillips.com/posts/2013/07/getting-a-python-script-to-run-in-the-background-as-a-service-on-boot/).
