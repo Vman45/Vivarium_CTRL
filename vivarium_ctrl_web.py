@@ -114,20 +114,35 @@ class Update:
         else:
             # Set the start date and time to now and last read to starting values.
             last_modified = datetime.datetime.now()
-            last_read = None
+            last_sensor_reading = db.select('sensor_readings', order='reading_datetime DESC', limit=1)[0]
+            last_device_states = list(db.select('device_states'))
             # Read the last row from the table every time the databases last modified date changes.
             while True:
                 this_modified = datetime.datetime.fromtimestamp(os.path.getmtime(dirname + 'vivarium_ctrl.db'))
                 if this_modified > last_modified:
                     last_modified = this_modified
-                    this_read = db.select('sensor_readings', order='reading_datetime DESC', limit=1)[0]
-                    # Add the device states to the response.
-                    for device_state in db.select('device_states'):
-                        this_read.update({device_state['device']: device_state['state']})
-                    if this_read != last_read:
-                        last_read = this_read
+                    this_sensor_reading = db.select('sensor_readings', order='reading_datetime DESC', limit=1)[0]
+                    this_device_states = list(db.select('device_states'))
+                    response = None
+                    if this_sensor_reading != last_sensor_reading and this_device_states != last_device_states:
+                        response = {'type': 'both', 'sensor_reading': this_sensor_reading, 'device_states': dict()}
+                        for device_state in this_device_states:
+                            response['device_states'].update({device_state['device']: device_state['state']})
+                        last_sensor_reading, last_device_states = this_sensor_reading, this_device_states
                         web.header('Content-type', 'application/json')
-                        yield '\r\n' + json.dumps(last_read) + '\r\n'
+                        yield '\r\n' + json.dumps(response) + '\r\n'
+                    elif this_sensor_reading != last_sensor_reading:
+                        response = {'type': 'sensor_reading', 'sensor_reading': this_sensor_reading}
+                        last_sensor_reading = this_sensor_reading
+                        web.header('Content-type', 'application/json')
+                        yield '\r\n' + json.dumps(response) + '\r\n'
+                    elif this_device_states != last_device_states:
+                        response = {'type': 'device_states', 'device_states': dict()}
+                        for device_state in this_device_states:
+                            response['device_states'].update({device_state['device']: device_state['state']})
+                        last_device_states = this_device_states
+                        web.header('Content-type', 'application/json')
+                        yield '\r\n' + json.dumps(response) + '\r\n'
                 time.sleep(1)
 
 

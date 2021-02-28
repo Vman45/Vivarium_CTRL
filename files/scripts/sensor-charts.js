@@ -72,12 +72,14 @@ function chartsFromTable() {
 }
 
 function updateCharts(data) {
-    temperature_chart.data.datasets[0].data.push({x: data.reading_datetime.split(".")[0], y: data.temperature});
-    temperature_chart.data.datasets[0].data.shift();
-    temperature_chart.update();
-    humidity_chart.data.datasets[0].data.push({x: data.reading_datetime.split(".")[0], y: data.humidity});
-    humidity_chart.data.datasets[0].data.shift();
-    humidity_chart.update();
+    if(data.type === "sensor_reading" || data.type === "both") {
+        temperature_chart.data.datasets[0].data.push({x: data.sensor_reading.reading_datetime.split(".")[0], y: data.sensor_reading.temperature});
+        temperature_chart.data.datasets[0].data.shift();
+        temperature_chart.update();
+        humidity_chart.data.datasets[0].data.push({x: data.sensor_reading.reading_datetime.split(".")[0], y: data.sensor_reading.humidity});
+        humidity_chart.data.datasets[0].data.shift();
+        humidity_chart.update();
+    };
 }
 
 function intToOnOff(value) {
@@ -89,21 +91,25 @@ function intToOnOff(value) {
 }
 
 function updateTableAndTiles(data) {
-    $("#sensor-readings-table tbody tr:first").before(
-        "<tr>" +
-        "   <td>" + data.reading_datetime.split(".")[0] + "</td>" +
-        "   <td>" + data.temperature + "</td>" +
-        "   <td>" + data.humidity + "</td>" +
-        "   <td>" + data.comments + "</td>" +
-        "</td>"
-    );
-    $("#sensor-readings-table tbody tr:last").remove();
-    $("#temperature-tile").text(data.temperature + "°C");
-    $("#humidity-tile").text(data.humidity + "%");
-    $("#heat-mat-tile input").val(intToOnOff(data["heat-mat"]));
-    $("#pump-tile input").val(intToOnOff(data.pump));
-    $("#fan-tile input").val(intToOnOff(data.fan));
-    $("#light-tile input").val(intToOnOff(data.light));
+    if(data.type === "sensor_reading" || data.type === "both") {
+        $("#sensor-readings-table tbody tr:first").before(
+            "<tr>" +
+            "   <td>" + data.sensor_reading.reading_datetime.split(".")[0] + "</td>" +
+            "   <td>" + data.sensor_reading.temperature + "</td>" +
+            "   <td>" + data.sensor_reading.humidity + "</td>" +
+            "   <td>" + data.sensor_reading.comments + "</td>" +
+            "</td>"
+        );
+        $("#sensor-readings-table tbody tr:last").remove();
+        $("#temperature-tile").text(data.sensor_reading.temperature + "°C");
+        $("#humidity-tile").text(data.sensor_reading.humidity + "%");
+    };
+    if(data.type === "device_states" || data.type === "both") {
+        $("#heat-mat-tile input").val(intToOnOff(data.device_states["heat-mat"]));
+        $("#pump-tile input").val(intToOnOff(data.device_states.pump));
+        $("#fan-tile input").val(intToOnOff(data.device_states.fan));
+        $("#light-tile input").val(intToOnOff(data.device_states.light));
+    };
 }
 
 window.onload = function () {
