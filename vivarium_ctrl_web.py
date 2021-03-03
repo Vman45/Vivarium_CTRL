@@ -234,7 +234,7 @@ class ToggleDevice:
                 state = 1
             logging.info("'" + device_state[0] + "' set '" + to_string(state) + "' by user '" + session.username + "'.")
             db.update('device_states', where='device=$device', vars={'device': device_state[0]}, state=state)
-            raise web.seeother('/')
+            #raise web.seeother('/')
 
 
 class Settings:

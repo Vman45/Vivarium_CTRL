@@ -146,3 +146,20 @@ window.onload = function () {
     });
     console.log("Request Sent");
 }
+
+$(document).ready(function() {
+    $(".tile input[type='button']").click(function() {
+        var formData = $("form#toggle-device").serializeArray();
+        formData.push({name: this.name, value: this.value});
+        console.log("Submit Clicked: ", JSON.stringify(formData));
+        $.ajax({
+            url: "/toggle_device",
+            type: "post",
+            dataType: "json",
+            data: formData,
+            success: function(data) {
+                // Do nothing.
+            }
+        });
+    });
+});
