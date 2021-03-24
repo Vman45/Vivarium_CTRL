@@ -50,7 +50,6 @@ HTTPServer.ssl_adapter = BuiltinSSLAdapter(
 # Set URLs
 urls = (
     '/', 'Index',
-    '/update', 'Update',
     '/(\d+)', 'Index',
     '/login', 'Login',
     '/logout', 'Logout',
@@ -103,47 +102,6 @@ class Index:
             if num_hours == '12':
                 num_hours = ''
             web.seeother('/' + num_hours)
-
-
-class Update:
-    """ Return live sensor readings from the database.
-    """
-    def GET(self):
-        if not session.authenticated:
-            return render.login('')
-        else:
-            # Set the start date and time to now and last read to starting values.
-            last_modified = datetime.datetime.now()
-            last_sensor_reading = db.select('sensor_readings', order='reading_datetime DESC', limit=1)[0]
-            last_device_states = list(db.select('device_states'))
-            # Read the last row from the table every time the databases last modified date changes.
-            while True:
-                this_modified = datetime.datetime.fromtimestamp(os.path.getmtime(dirname + 'vivarium_ctrl.db'))
-                if this_modified > last_modified:
-                    last_modified = this_modified
-                    this_sensor_reading = db.select('sensor_readings', order='reading_datetime DESC', limit=1)[0]
-                    this_device_states = list(db.select('device_states'))
-                    response = None
-                    if this_sensor_reading != last_sensor_reading and this_device_states != last_device_states:
-                        response = {'type': 'both', 'sensor_reading': this_sensor_reading, 'device_states': dict()}
-                        for device_state in this_device_states:
-                            response['device_states'].update({device_state['device']: device_state['state']})
-                        last_sensor_reading, last_device_states = this_sensor_reading, this_device_states
-                        web.header('Content-type', 'application/json')
-                        yield '\r\n' + json.dumps(response) + '\r\n'
-                    elif this_sensor_reading != last_sensor_reading:
-                        response = {'type': 'sensor_reading', 'sensor_reading': this_sensor_reading}
-                        last_sensor_reading = this_sensor_reading
-                        web.header('Content-type', 'application/json')
-                        yield '\r\n' + json.dumps(response) + '\r\n'
-                    elif this_device_states != last_device_states:
-                        response = {'type': 'device_states', 'device_states': dict()}
-                        for device_state in this_device_states:
-                            response['device_states'].update({device_state['device']: device_state['state']})
-                        last_device_states = this_device_states
-                        web.header('Content-type', 'application/json')
-                        yield '\r\n' + json.dumps(response) + '\r\n'
-                time.sleep(1)
 
 
 class Login:
@@ -234,7 +192,7 @@ class ToggleDevice:
                 state = 1
             logging.info("'" + device_state[0] + "' set '" + to_string(state) + "' by user '" + session.username + "'.")
             db.update('device_states', where='device=$device', vars={'device': device_state[0]}, state=state)
-            #raise web.seeother('/')
+            raise web.seeother('/')
 
 
 class Settings:

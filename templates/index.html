@@ -1,6 +1,6 @@
 $def with (device_states, sensor_readings, num_hours)
 $var css: files/css/style.css
-$var scripts: files/scripts/moment.js files/scripts/Chart.js files/scripts/jquery.min.js files/scripts/sensor-charts.js
+$var scripts: files/scripts/moment.js files/scripts/Chart.js files/scripts/sensor-charts.js
 
 <html lang="en">
 
@@ -32,13 +32,13 @@ $var scripts: files/scripts/moment.js files/scripts/Chart.js files/scripts/jquer
             <div class="tile" id="camera-tile">
                 <a href="/stream.mjpg">Live</a>
             </div>
-            <form id='toggle-device'></form>
+            <form id='toggle-device' method="POST" action="/toggle_device"></form>
             $for device_state in device_states:
                 <div class="tile" id="$device_state.device-tile">
                     $if device_state.state == 1:
-                        <input form="toggle-device" type="button" name="$device_state.device" value="On">
+                        <input form="toggle-device" type="submit" name="$device_state.device" value="On">
                     $else:
-                        <input form="toggle-device" type="button" name="$device_state.device" value="Off">
+                        <input form="toggle-device" type="submit" name="$device_state.device" value="Off">
                 </div>
         </div>
         <div class="chart-container">
