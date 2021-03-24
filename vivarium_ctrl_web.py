@@ -219,9 +219,12 @@ class Settings:
                 elif settings[key] == 'false':
                     settings[key] = False
                 else:
-                    value = to_float(settings[key])
-                    if value is not None:
-                        settings[key] = value
+                    if '.' in settings[key]:
+                        value = to_float(settings[key])
+                        if value is not None:
+                            settings[key] = value
+                    elif str.isnumeric(settings[key]):
+                        settings[key] = int(settings[key])
             # Write to file immediately.
             f = open(dirname + 'settings.json', 'wt')
             f.write(json.dumps(settings, indent=4))

@@ -25,6 +25,7 @@ import logging
 from logger import Logger
 import sys
 import os
+import time
 
 # Use paths relative to the script.
 dirname = os.path.dirname(__file__)
@@ -211,9 +212,11 @@ def sensor_monitor_loop():
         comments = "Heat Mat: " + to_string(heat_mat_state) + ", Pump: " + to_string(pump_state) + \
                    ", Fan: " + to_string(fan_state) + ", Light: " + to_string(light_state)
 
-        # Insert and commit.
+        # Insert, delete old readings and commit.
         c.execute('INSERT INTO sensor_readings VALUES (?,?,?,?)',
                   (datetime.datetime.now(), temperature, humidity, comments))
+        c.execute('DELETE FROM sensor_readings WHERE reading_datetime<?',
+                  (datetime.datetime.fromtimestamp(time.time() - 86400 * settings['days-to-keep']),))
         db.commit()
 
         # Sleep until next read.
