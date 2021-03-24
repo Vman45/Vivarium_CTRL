@@ -21,6 +21,7 @@ import datetime
 import time
 import json
 import logging
+import logging.handlers
 from logger import Logger
 import sys
 import os
@@ -31,15 +32,14 @@ dirname = os.path.dirname(__file__)
 if dirname:
     dirname += '/'
 
-logging.basicConfig(
-    filename=dirname + 'vivarium_ctrl_web.log',
-    format='%(asctime)s - %(message)s',
-    datefmt='%d-%b-%y %H:%M:%S',
-    level=logging.INFO
-)
+logger = logging.getLogger('Vivarium_CTRL_Web')
+logger.setLevel(logging.INFO)
+handler = logging.handlers.RotatingFileHandler(dirname + 'vivarium_ctrl_web.log', maxBytes=262144, backupCount=3)
+handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s', '%d-%b-%y %H:%M:%S'))
+logger.addHandler(handler)
 
-sys.stdout = Logger(logging.getLogger(), logging.INFO, '- \[\d+/\w+/\d+ \d+:\d+:\d+] ')
-sys.stderr = Logger(logging.getLogger(), logging.ERROR, '- \[\d+/\w+/\d+ \d+:\d+:\d+] ')
+sys.stdout = Logger(logger, logging.INFO)
+sys.stderr = Logger(logger, logging.ERROR)
 
 # Use HTTPS
 HTTPServer.ssl_adapter = BuiltinSSLAdapter(
@@ -124,10 +124,10 @@ class Login:
             if user.password == password:
                 session.authenticated = True
                 session.username = user.username
-                logging.info("Successful login by user '" + session.username + "'.")
+                logger.info("Successful login by user '" + session.username + "'.")
                 raise web.seeother('/')
         # If we made it this far either the username does not exist or the password is wrong.
-        logging.warning("Failed login attempt using username '" + username + "'.")
+        logger.warning("Failed login attempt using username '" + username + "'.")
         return render.login('Invalid username or password.')
 
 
@@ -135,7 +135,7 @@ class Logout:
     """ Logout from a session.
     """
     def POST(self):
-        logging.info("Logout by user '" + session.username + "'.")
+        logger.info("Logout by user '" + session.username + "'.")
         session.authenticated = False
         session.username = None
         session.kill()
@@ -152,7 +152,7 @@ class Stream:
             camera = picamera.PiCamera()
             camera.resolution = (1280, 960)
             camera.vflip = True
-            logging.info("Camera stream opened by user '" + session.username + "'.")
+            logger.info("Camera stream opened by user '" + session.username + "'.")
             web.header('Content-type', 'multipart/x-mixed-replace; boundary=jpgboundary')
             stream = io.BytesIO()
             try:
@@ -166,7 +166,7 @@ class Stream:
             except (KeyboardInterrupt, BrokenPipeError, ConnectionResetError):
                 pass
             finally:
-                logging.info("Camera stream closed by user '" + session.username + "'.")
+                logger.info("Camera stream closed by user '" + session.username + "'.")
                 stream.close()
                 camera.close()
 
@@ -190,7 +190,7 @@ class ToggleDevice:
                 state = 0
             else:
                 state = 1
-            logging.info("'" + device_state[0] + "' set '" + to_string(state) + "' by user '" + session.username + "'.")
+            logger.info("'" + device_state[0] + "' set '" + to_string(state) + "' by user '" + session.username + "'.")
             db.update('device_states', where='device=$device', vars={'device': device_state[0]}, state=state)
             raise web.seeother('/')
 
@@ -232,7 +232,7 @@ class Settings:
             # Set reload flag.
             db.update('flags', where="flag='reload_settings'", state=1)
             # Render template with message and new settings.
-            logging.info("Settings updated by user '" + session.username + "'.")
+            logger.info("Settings updated by user '" + session.username + "'.")
             return render.settings(settings, 'Settings updated successfully.')
 
 
