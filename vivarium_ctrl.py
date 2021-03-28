@@ -66,8 +66,8 @@ def is_time_between(begin_time, end_time, check_time=None):
         Taken from the accepted answer by Joe Holloway here:
         https://stackoverflow.com/a/10048290
     """
-    # If check time is not given, default to current UTC time.
-    check_time = check_time or datetime.datetime.utcnow().time()
+    # If check time is not given, default to current time.
+    check_time = check_time or datetime.datetime.now().time()
     if begin_time < end_time:
         return check_time >= begin_time and check_time <= end_time
     else:  # Crosses midnight.
