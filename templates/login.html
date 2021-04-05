@@ -1,5 +1,6 @@
 $def with (login_status)
 $var css: files/css/style.css
+$var scripts: files/scripts/script.js
 
 <html lang="en">
 
@@ -12,6 +13,9 @@ $var css: files/css/style.css
         $if self.css:
             $for style in self.css.split():
                 <link rel="stylesheet" href="$style"/>
+        $if self.scripts:
+            $for script in self.scripts.split():
+                <script src="$script"></script>
     </head>
 
     <body>
@@ -19,18 +23,18 @@ $var css: files/css/style.css
             <h1>Vivarium_CTRL</h1>
         </div>
         <div class="login-container">
-            <form action="/login" method="POST">
+            <form onsubmit="login(); return false;">
                 <table id="login">
                     <tr>
                         <th colspan="2">Login</th>
                     </tr>
                     <tr>
                         <td>Username: </td>
-                        <td><input type="text" name="username"></td>
+                        <td><input type="text" id="username" name="username"></td>
                     </tr>
                     <tr>
                         <td>Password: </td>
-                        <td><input type="password" name="password"></td>
+                        <td><input type="password" id="password" name="password"></td>
                     </tr>
                     <tr>
                         <td colspan="2" class="form-buttons"><input type="submit" value="Login"></td>

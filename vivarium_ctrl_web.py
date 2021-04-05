@@ -125,10 +125,12 @@ class Login:
                 session.authenticated = True
                 session.username = user.username
                 logger.info("Successful login by user '" + session.username + "'.")
-                raise web.seeother('/')
+                return  # Will return 200 OK by default.
         # If we made it this far either the username does not exist or the password is wrong.
         logger.warning("Failed login attempt using username '" + username + "'.")
-        return render.login('Invalid username or password.')
+        web.ctx.status = '401 Unauthorized'
+        web.header('WWW-Authenticate', 'Forms realm="Vivarium_CTRL"')
+        return  # Will return the 401 Unauthorized with header.
 
 
 class Logout:
