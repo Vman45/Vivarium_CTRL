@@ -1,6 +1,6 @@
 $def with (device_states, sensor_readings, num_hours)
 $var css: files/css/style.css
-$var scripts: files/scripts/moment.js files/scripts/Chart.js files/scripts/sensor-charts.js
+$var scripts: files/scripts/moment.js files/scripts/Chart.js files/scripts/script.js files/scripts/sensor-charts.js
 
 <html lang="en">
 
@@ -36,9 +36,9 @@ $var scripts: files/scripts/moment.js files/scripts/Chart.js files/scripts/senso
             $for device_state in device_states:
                 <div class="tile" id="$device_state.device-tile">
                     $if device_state.state == 1:
-                        <input form="toggle-device" type="submit" name="$device_state.device" value="On">
+                        <input form="toggle-device" type="submit" id="$device_state.device" name="$device_state.device" value="On">
                     $else:
-                        <input form="toggle-device" type="submit" name="$device_state.device" value="Off">
+                        <input form="toggle-device" type="submit" id="$device_state.device" name="$device_state.device" value="Off">
                 </div>
         </div>
         <div class="chart-container">
@@ -83,6 +83,12 @@ $var scripts: files/scripts/moment.js files/scripts/Chart.js files/scripts/senso
         <div class="footer">
             <p>Find me on <a href="https://github.com/danieldean/Vivarium_CTRL">GitHub</a></p>
         </div>
+        <script>
+            window.onload = function () {
+                chartsFromTable();
+                reload();
+            }
+        </script>
     </body>
 
 </html>

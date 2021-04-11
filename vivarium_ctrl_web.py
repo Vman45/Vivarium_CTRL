@@ -51,6 +51,7 @@ HTTPServer.ssl_adapter = BuiltinSSLAdapter(
 urls = (
     '/', 'Index',
     '/(\d+)', 'Index',
+    '/reload', 'Reload',
     '/login', 'Login',
     '/logout', 'Logout',
     '/favicon.ico', 'Favicon',
@@ -102,6 +103,40 @@ class Index:
             if num_hours == '12':
                 num_hours = ''
             web.seeother('/' + num_hours)
+
+
+class Reload:
+    def POST(self):
+        if not session.authenticated:
+            web.ctx.status = '401 Unauthorized'
+            web.header('WWW-Authenticate', 'Forms realm="Vivarium_CTRL"')
+            return  # Will return the 401 Unauthorized with header.
+        else:
+            # Cast timestamp from string to float.
+            from_timestamp = to_float(web.input().last)
+            # If this is None then there is an error on the clients part.
+            if from_timestamp is None:
+                web.ctx.status = '400 Bad Request'
+                return  # Will return 400 Bad Request.
+            elif os.path.getmtime(dirname + 'vivarium_ctrl.db') > from_timestamp:  # Check if the DB has been modified.
+                # Convert timestamp to datetime.
+                from_datetime = datetime.datetime.fromtimestamp(from_timestamp)
+                # Get the sensor reading(s).
+                sensor_readings = list(db.select('sensor_readings', order='reading_datetime DESC',
+                                                 where='reading_datetime>$from_datetime',
+                                                 vars={'from_datetime': from_datetime}))
+                # Get device states and convert the 1/0 to On/Off.
+                device_states = list(db.select('device_states'))
+                for device_state in device_states:
+                    device_state.state = to_string(device_state.state)
+                # Create a combined dict to return.
+                sensor_readings_and_device_states = {'sensor_readings': sensor_readings, 'device_states': device_states}
+                # Set header, dump to JSON and return.
+                web.header('Content-type:', 'application/json')
+                return json.dumps(sensor_readings_and_device_states)
+            else:
+                # If we made it this far there are no changes.
+                return web.notmodified()
 
 
 class Login:

@@ -70,8 +70,3 @@ function chartsFromTable() {
     temperature_chart = BuildChart(temperature_data, "Temperature (°C)", "temperature-chart", 'rgba(255, 0, 0, 0.2)', 'rgba(255, 0, 0, 0.8)');
     humidity_chart = BuildChart(humidity_data, "Humidity (%)", "humidity-chart", 'rgba(0, 0, 255, 0.2)', 'rgba(0, 0, 255, 0.8)');
 }
-
-window.onload = function () {
-    // Build charts on page load.
-    chartsFromTable();
-}
