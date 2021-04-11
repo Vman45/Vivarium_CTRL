@@ -123,6 +123,8 @@ function chartsFromTable() {
 ------------------------------------
 */
 
+var fromDateTime = null;
+
 function reload() {
 
     setInterval(function() {
@@ -180,12 +182,48 @@ function reload() {
             };
         };
 
-        var fromDateTime = Date.parse(document.getElementById("sensor-readings-table").rows[1].cells[0].innerHTML);
-        fromDateTime = Math.ceil(fromDateTime / 1000) + 1;  // + 1 to account for truncated fractions of a second.
+        var lastReading = Date.parse(document.getElementById("sensor-readings-table").rows[1].cells[0].innerHTML);
+        lastReading = Math.ceil(lastReading / 1000) + 1;  // + 1 to account for truncated fractions of a second
+        // Account for possible device toggles since last sensor reading.
+        if(fromDateTime == null || lastReading > fromDateTime) {
+            fromDateTime = lastReading;
+        };
         xhttp.open("POST", "/reload", true);
         xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhttp.send("last=" + fromDateTime);
 
     }, 5000);
+
+};
+
+/*
+------------------------------------
+---------- Toggle Devices ----------
+------------------------------------
+*/
+
+function toggleDevice(button) {
+
+    //console.log("Button for", button.id, "toggled from", button.value + ".");
+
+    var xhttp = new XMLHttpRequest();
+
+    xhttp.onreadystatechange = function() {
+        if(this.readyState == 4 && this.status == 200) {
+            // Parse response into JSON and update button value.
+            var deviceState = JSON.parse(this.responseText);
+            document.getElementById(deviceState.device).value = deviceState.state;
+        } else if(this.readyState == 4 && this.status == 401) {
+            //console.log("Session expired.");
+            document.location = "/login";
+        };
+    };
+
+    // To prevent double reloading.
+    fromDateTime = Math.ceil(Date.now() / 1000);
+
+    xhttp.open("POST", "/toggle_device", true);
+    xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhttp.send("device=" + button.id + "&state=" + button.value);
 
 };

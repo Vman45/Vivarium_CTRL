@@ -55,7 +55,7 @@ body {
 .tile a {
     color: rgb(255, 255, 255);
 }
-.tile input[type=submit] {
+.tile input[type=button] {
     font-size: 1rem;
 }
 #temperature-tile {

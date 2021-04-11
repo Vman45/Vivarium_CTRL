@@ -220,16 +220,20 @@ class ToggleDevice:
     """
     def POST(self):
         if not session.authenticated:
-            raise web.seeother('/login')
+            web.ctx.status = '401 Unauthorized'
+            web.header('WWW-Authenticate', 'Forms realm="Vivarium_CTRL"')
+            return  # Will return the 401 Unauthorized with header.
         else:
-            device_state = next(iter(web.input().items()))
-            if device_state[1] == "On":
-                state = 0
+            device = web.input().device
+            old_state = web.input().state
+            if old_state == "On":
+                new_state = 0
             else:
-                state = 1
-            logger.info("'" + device_state[0] + "' set '" + to_string(state) + "' by user '" + session.username + "'.")
-            db.update('device_states', where='device=$device', vars={'device': device_state[0]}, state=state)
-            raise web.seeother('/')
+                new_state = 1
+            logger.info("'" + device + "' set '" + to_string(new_state) + "' by user '" + session.username + "'.")
+            db.update('device_states', where='device=$device', vars={'device': device}, state=new_state)
+            web.header('Content-type:', 'application/json')
+            return json.dumps({"device": device, "state": to_string(new_state)})
 
 
 class Settings:
