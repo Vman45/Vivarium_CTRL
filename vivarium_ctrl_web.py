@@ -249,7 +249,9 @@ class Settings:
 
     def POST(self):
         if not session.authenticated:
-            raise web.seeother('/login')
+            web.ctx.status = '401 Unauthorized'
+            web.header('WWW-Authenticate', 'Forms realm="Vivarium_CTRL"')
+            return  # Will return the 401 Unauthorized with header.
         else:
             # Retrieve the input.
             settings = web.input()
@@ -274,7 +276,7 @@ class Settings:
             db.update('flags', where="flag='reload_settings'", state=1)
             # Render template with message and new settings.
             logger.info("Settings updated by user '" + session.username + "'.")
-            return render.settings(settings, 'Settings updated successfully.')
+            return  # Will return 200 OK by default.
 
 
 class Files:

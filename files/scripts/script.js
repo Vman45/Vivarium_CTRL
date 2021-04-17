@@ -231,3 +231,27 @@ function toggleDevice(button) {
     xhttp.send("device=" + button.id + "&state=" + button.value);
 
 };
+
+/*
+-------------------------
+-------- Settings -------
+-------------------------
+*/
+
+function updateSettings(form) {
+
+    var xhttp = new XMLHttpRequest();
+
+    xhttp.onreadystatechange = function() {
+        if(this.readyState == 4 && this.status == 200) {
+            document.getElementById("settings-status").innerHTML = "Settings updated successfully."
+        } else if(this.readyState == 4 && this.status == 401) {
+            //console.log("Session expired.");
+            document.location = "/login";
+        };
+    };
+
+    xhttp.open("POST", "/settings", true);
+    xhttp.send(new FormData(form));
+
+};

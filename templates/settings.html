@@ -1,5 +1,6 @@
 $def with (settings, settings_status)
 $var css: files/css/style.css
+$var scripts: files/scripts/script.js
 
 <html lang="en">
 
@@ -12,6 +13,9 @@ $var css: files/css/style.css
         $if self.css:
             $for style in self.css.split():
                 <link rel="stylesheet" href="$style"/>
+        $if self.scripts:
+            $for script in self.scripts.split():
+                <script src="$script"></script>
     </head>
 
     <body>
@@ -19,7 +23,7 @@ $var css: files/css/style.css
             <h1>Vivarium_CTRL</h1>
         </div>
         <div class="settings-container">
-            <form action="/settings" method="POST">
+            <form onsubmit="updateSettings(this); return false;">
                 <table id="settings">
                     <tr>
                         <th colspan="2">Settings</th>
