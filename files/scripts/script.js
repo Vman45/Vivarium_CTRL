@@ -123,7 +123,7 @@ function chartsFromTable() {
 ------------------------------------
 */
 
-var fromDateTime = null;
+var fromDateTime = Math.ceil(Date.now() / 1000);
 
 function reload() {
 
@@ -141,9 +141,11 @@ function reload() {
                 // Add and remove sensor readings to/from table and charts.
                 var table = document.getElementById("sensor-readings-table");
 
-                // Update temperature and humidity tiles.
-                document.getElementById("temperature-tile").innerHTML = sensorReadings[sensorReadings.length - 1].temperature + "°C"
-                document.getElementById("humidity-tile").innerHTML = sensorReadings[sensorReadings.length - 1].humidity + "%"
+                if(sensorReadings.length > 0) {
+                    // Update temperature and humidity tiles.
+                    document.getElementById("temperature-tile").innerHTML = sensorReadings[sensorReadings.length - 1].temperature + "°C";
+                    document.getElementById("humidity-tile").innerHTML = sensorReadings[sensorReadings.length - 1].humidity + "%";
+                };
 
                 for(i = sensorReadings.length - 1; i >= 0; i--) {
 
