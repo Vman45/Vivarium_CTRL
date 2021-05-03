@@ -1,4 +1,4 @@
-$def with (settings, settings_status)
+$def with (settings)
 $var css: files/css/style.css
 $var scripts: files/scripts/script.js
 
@@ -123,12 +123,12 @@ $var scripts: files/scripts/script.js
                     <tr>
                         <td class="form-buttons" colspan="2">
                             <input type="submit" value="Update">
-                            <input type="reset">
+                            <input type="reset" onclick="resetSettingsStatus();">
                             <input type="button" value="Back" onclick="location.href='/';">
                         </td>
                     </tr>
                     <tr>
-                        <td id="settings-status" colspan="2">$settings_status</td>
+                        <td id="settings-status" colspan="2"></td>
                     </tr>
                 </table>
             </form>

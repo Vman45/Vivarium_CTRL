@@ -245,7 +245,7 @@ class Settings:
         else:
             f = open(dirname + 'settings.json', 'rt')
             settings = json.loads(f.read())
-            return render.settings(settings, '')
+            return render.settings(settings)
 
     def POST(self):
         if not session.authenticated:

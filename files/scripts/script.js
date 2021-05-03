@@ -257,3 +257,7 @@ function updateSettings(form) {
     xhttp.send(new FormData(form));
 
 };
+
+function resetSettingsStatus() {
+    document.getElementById("settings-status").innerHTML = "";
+};
