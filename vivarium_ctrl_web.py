@@ -14,8 +14,8 @@
 import web
 import io
 import picamera
-from cheroot.server import HTTPServer
-from cheroot.ssl.builtin import BuiltinSSLAdapter
+#from cheroot.server import HTTPServer
+#from cheroot.ssl.builtin import BuiltinSSLAdapter
 import hashlib
 import datetime
 import time
@@ -42,10 +42,10 @@ sys.stdout = Logger(logger, logging.INFO)
 sys.stderr = Logger(logger, logging.ERROR)
 
 # Use HTTPS
-HTTPServer.ssl_adapter = BuiltinSSLAdapter(
-    certificate=dirname + 'cert/cert.pem',
-    private_key=dirname + 'cert/key.pem'
-)
+#HTTPServer.ssl_adapter = BuiltinSSLAdapter(
+#    certificate=dirname + 'cert/cert.pem',
+#    private_key=dirname + 'cert/key.pem'
+#)
 
 # Set URLs
 urls = (
@@ -82,7 +82,8 @@ class Index:
     """
     def GET(self, num_hours=12):
         if not session.authenticated:
-            raise web.seeother('/login')
+            proto = web.ctx.env.get('HTTP_X_FORWARDED_PROTO', 'http')
+            raise web.seeother(proto + '://' + web.ctx.host + '/login')
         else:
             # Calculate date and time by subtracting from timestamp.
             from_datetime = datetime.datetime.fromtimestamp(time.time() - 3600 * int(num_hours))
@@ -97,12 +98,14 @@ class Index:
 
     def POST(self):
         if not session.authenticated:
-            raise web.seeother('/login')
+            proto = web.ctx.env.get('HTTP_X_FORWARDED_PROTO', 'http')
+            raise web.seeother(proto + '://' + web.ctx.host + '/login')
         else:
             num_hours = web.input().num_hours
             if num_hours == '12':
                 num_hours = ''
-            web.seeother('/' + num_hours)
+            proto = web.ctx.env.get('HTTP_X_FORWARDED_PROTO', 'http')
+            raise web.seeother(proto + '://' + web.ctx.host + '/' + num_hours)
 
 
 class Reload:
@@ -146,7 +149,8 @@ class Login:
         if not session.authenticated:
             return render.login('')
         else:
-            raise web.seeother('/')
+            proto = web.ctx.env.get('HTTP_X_FORWARDED_PROTO', 'http')
+            raise web.seeother(proto + '://' + web.ctx.host + '/')
 
     def POST(self):
         username, password = web.input().username, web.input().password
@@ -184,7 +188,8 @@ class Stream:
     """
     def GET(self):
         if not session.authenticated:
-            raise web.seeother('/login')
+            proto = web.ctx.env.get('HTTP_X_FORWARDED_PROTO', 'http')
+            raise web.seeother(proto + '://' + web.ctx.host + '/login')
         else:
             camera = picamera.PiCamera()
             camera.resolution = (1280, 960)
@@ -212,7 +217,8 @@ class Favicon:
     """ Redirect requests for a favicon.
     """
     def GET(self):
-        raise web.seeother('/files/images/favicon.ico')
+        proto = web.ctx.env.get('HTTP_X_FORWARDED_PROTO', 'http')
+        raise web.seeother(proto + '://' + web.ctx.host + '/files/images/favicon.ico')
 
 
 class ToggleDevice:
@@ -241,7 +247,8 @@ class Settings:
     """
     def GET(self):
         if not session.authenticated:
-            raise web.seeother('/login')
+            proto = web.ctx.env.get('HTTP_X_FORWARDED_PROTO', 'http')
+            raise web.seeother(proto + '://' + web.ctx.host + '/login')
         else:
             f = open(dirname + 'settings.json', 'rt')
             settings = json.loads(f.read())
@@ -315,4 +322,5 @@ def to_string(value):
 
 
 if __name__ == "__main__":
-    web.httpserver.runsimple(app.wsgifunc(), ("0.0.0.0", 8181))
+    app.run()
+    #web.httpserver.runsimple(app.wsgifunc(), ("0.0.0.0", 8181))
