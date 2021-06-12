@@ -28,6 +28,8 @@ function login() {
                 document.location= "/";
             } else if (this.readyState == 4 && this.status == 401) {
                 console.log("Login failed.");
+                document.getElementById("username").value = "";
+                document.getElementById("password").value = "";
                 document.getElementById("login-status").innerHTML = "Invalid username or password.";
             };
         };
