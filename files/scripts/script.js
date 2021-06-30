@@ -143,44 +143,59 @@ function reload() {
                 // Add and remove sensor readings to/from table and charts.
                 var table = document.getElementById("sensor-readings-table");
 
-                if(sensorReadings.length > 0) {
-                    // Update temperature and humidity tiles.
-                    document.getElementById("temperature-tile").innerHTML = sensorReadings[sensorReadings.length - 1].temperature + "°C";
-                    document.getElementById("humidity-tile").innerHTML = sensorReadings[sensorReadings.length - 1].humidity + "%";
+                if(sensorReadings != null) {
+
+                    if(sensorReadings.length > 0) {
+                        // Update temperature and humidity tiles.
+                        document.getElementById("temperature-tile").innerHTML = sensorReadings[sensorReadings.length - 1].temperature + "°C";
+                        document.getElementById("humidity-tile").innerHTML = sensorReadings[sensorReadings.length - 1].humidity + "%";
+                    };
+
+                    for(i = sensorReadings.length - 1; i >= 0; i--) {
+
+                        // Update table.
+                        table.deleteRow(-1);
+                        var row = table.insertRow(1);
+                        row.innerHTML =
+                            "<td>" + sensorReadings[i].reading_datetime.split(".")[0] + "</td>" +
+                            "<td>" + sensorReadings[i].temperature + "</td>" +
+                            "<td>" + sensorReadings[i].humidity + "</td>" +
+                            "<td>" + sensorReadings[i].comments + "</td>";
+
+                        // Update charts.
+                        temperature_chart.data.datasets[0].data.push({
+                            x: sensorReadings[i].reading_datetime.split(".")[0],
+                            y: sensorReadings[i].temperature
+                        });
+                        temperature_chart.data.datasets[0].data.shift();
+                        temperature_chart.update();
+                        humidity_chart.data.datasets[0].data.push({
+                            x: sensorReadings[i].reading_datetime.split(".")[0],
+                            y: sensorReadings[i].humidity
+                         });
+                        humidity_chart.data.datasets[0].data.shift();
+                        humidity_chart.update();
+
+                    };
+
                 };
 
-                for(i = sensorReadings.length - 1; i >= 0; i--) {
+                if(deviceStates != null) {
 
-                    // Update table.
-                    table.deleteRow(-1);
-                    var row = table.insertRow(1);
-                    row.innerHTML =
-                        "<td>" + sensorReadings[i].reading_datetime.split(".")[0] + "</td>" +
-                        "<td>" + sensorReadings[i].temperature + "</td>" +
-                        "<td>" + sensorReadings[i].humidity + "</td>" +
-                        "<td>" + sensorReadings[i].comments + "</td>";
-
-                    // Update charts.
-                    temperature_chart.data.datasets[0].data.push({
-                        x: sensorReadings[i].reading_datetime.split(".")[0],
-                        y: sensorReadings[i].temperature
-                    });
-                    temperature_chart.data.datasets[0].data.shift();
-                    temperature_chart.update();
-                    humidity_chart.data.datasets[0].data.push({
-                        x: sensorReadings[i].reading_datetime.split(".")[0],
-                        y: sensorReadings[i].humidity
-                     });
-                    humidity_chart.data.datasets[0].data.shift();
-                    humidity_chart.update();
+                    // Split device states and update tiles.
+                    var deviceStates = data.device_states;
+                    for(i = 0; i < deviceStates.length; i++) {
+                        document.getElementById(deviceStates[i].device).value = deviceStates[i].state;
+                    };
 
                 };
 
-                // Split device states and update tiles.
-                var deviceStates = data.device_states;
-                for(i = 0; i < deviceStates.length; i++) {
-                    document.getElementById(deviceStates[i].device).value = deviceStates[i].state;
-                };
+            var backendRunning = data.backend_running;
+            if(backendRunning) {
+                console.log("Backend is running.");
+            } else {
+                console.log("Backend is not running.");
+            };
 
             } else if(this.readyState == 4 && this.status == 401) {
                 //console.log("Session expired.");

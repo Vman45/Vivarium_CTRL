@@ -275,9 +275,11 @@ def main():
     db.commit()
 
     # Create flags table.
+    flags = [('reload_settings', 0),
+             ('pid', os.getpid())]
     c.execute('DROP TABLE IF EXISTS flags')
     c.execute('CREATE TABLE flags (flag TEXT, state NUMERIC)')
-    c.execute("INSERT INTO flags VALUES ('reload_settings', 0)")
+    c.executemany("INSERT INTO flags VALUES (?,?)", flags)
     db.commit()
 
     # Finished with this connection.

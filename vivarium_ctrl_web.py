@@ -26,6 +26,7 @@ from logger import Logger
 import sys
 import os
 import mimetypes
+import psutil
 
 # Use paths relative to the script.
 dirname = os.path.dirname(__file__)
@@ -115,6 +116,8 @@ class Reload:
             web.header('WWW-Authenticate', 'Forms realm="Vivarium_CTRL"')
             return  # Will return the 401 Unauthorized with header.
         else:
+            # To construct response.
+            return_data = dict()
             # Cast timestamp from string to float.
             from_timestamp = to_float(web.input().last)
             # If this is None then there is an error on the clients part.
@@ -133,13 +136,19 @@ class Reload:
                 for device_state in device_states:
                     device_state.state = to_string(device_state.state)
                 # Create a combined dict to return.
-                sensor_readings_and_device_states = {'sensor_readings': sensor_readings, 'device_states': device_states}
-                # Set header, dump to JSON and return.
-                web.header('Content-type:', 'application/json')
-                return json.dumps(sensor_readings_and_device_states)
+                return_data.update({'sensor_readings': sensor_readings,
+                                   'device_states': device_state})
+            # Check backend process is running.
+            pid = db.select('flags', where='flag="pid"')
+            if pid and psutil.pid_exists(pid[0].state):
+                backend_running = True
             else:
-                # If we made it this far there are no changes.
-                return web.notmodified()
+                backend_running = False
+            # Add to response.
+            return_data.update({'backend_running': backend_running})
+            # Set header, dump to JSON and return.
+            web.header('Content-type:', 'application/json')
+            return json.dumps(return_data)
 
 
 class Login:
