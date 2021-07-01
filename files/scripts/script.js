@@ -192,9 +192,13 @@ function reload() {
 
             var backendRunning = data.backend_running;
             if(backendRunning) {
-                console.log("Backend is running.");
+                //console.log("Backend is running.");
+                document.getElementById("backend-running-tile").innerHTML = "Running";
+                document.getElementById("backend-running-tile").style.backgroundColor = "rgba(60, 179, 113, 0.8)";
             } else {
-                console.log("Backend is not running.");
+                //console.log("Backend is not running.");
+                document.getElementById("backend-running-tile").innerHTML = "Stopped";
+                document.getElementById("backend-running-tile").style.backgroundColor = "rgba(255, 69, 45, 0.8)";
             };
 
             } else if(this.readyState == 4 && this.status == 401) {
