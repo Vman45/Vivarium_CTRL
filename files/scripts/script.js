@@ -151,10 +151,17 @@ function reload() {
                         document.getElementById("humidity-tile").innerHTML = sensorReadings[sensorReadings.length - 1].humidity + "%";
                     };
 
+                    // Check if readings should be removed.
+                    var firstReading = Date.parse(table.rows[table.rows.length - 1].cells[0].innerHTML);
+                    var retainFrom = Date.now() - 3600000 * document.getElementById("num_hours").value;
+                    var removeReadings = firstReading < retainFrom;
+
                     for(i = sensorReadings.length - 1; i >= 0; i--) {
 
                         // Update table.
-                        table.deleteRow(-1);
+                        if(removeReadings) {
+                            table.deleteRow(-1);
+                        };
                         var row = table.insertRow(1);
                         row.innerHTML =
                             "<td>" + sensorReadings[i].reading_datetime.split(".")[0] + "</td>" +
@@ -167,13 +174,17 @@ function reload() {
                             x: sensorReadings[i].reading_datetime.split(".")[0],
                             y: sensorReadings[i].temperature
                         });
-                        temperature_chart.data.datasets[0].data.shift();
+                        if(removeReadings) {
+                            temperature_chart.data.datasets[0].data.shift();
+                        };
                         temperature_chart.update();
                         humidity_chart.data.datasets[0].data.push({
                             x: sensorReadings[i].reading_datetime.split(".")[0],
                             y: sensorReadings[i].humidity
                          });
-                        humidity_chart.data.datasets[0].data.shift();
+                        if(removeReadings) {
+                            humidity_chart.data.datasets[0].data.shift();
+                        };
                         humidity_chart.update();
 
                     };
